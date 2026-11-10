@@ -1,0 +1,14 @@
+node_modules/
+.env
+database/data/*
+!database/data/.gitkeep
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+public/vendor/*
+!public/vendor/.gitkeep
+respaldos/
+npm-debug.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,24 @@
+{
+  "name": "pixel-pos",
+  "version": "0.1.0",
+  "description": "Sistema local de facturación, inventario y punto de venta para tienda de ropa y accesorios (Honduras - SAR)",
+  "main": "server/index.js",
+  "type": "commonjs",
+  "private": true,
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "migrate": "node server/db/migrate.js",
+    "seed:demo": "node server/db/seed-demo.js",
+    "backup": "node server/db/backup.js",
+    "vendor": "node scripts/vendor.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "express": "^4.21.2"
+  }
+}
