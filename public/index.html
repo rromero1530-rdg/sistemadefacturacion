@@ -3,116 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zoe Closet · Punto de venta</title>
+  <title>Zoe Closet · Inicio</title>
   <link rel="icon" href="/favicon.ico" />
   <script src="/vendor/tailwind.js"></script>
   <script src="/js/tw-config.js"></script>
   <script src="/vendor/lucide.min.js"></script>
-  <style>
-    [data-lucide] { width: 1.1em; height: 1.1em; }
-    .kbd { font-size: 10px; padding: 1px 5px; border-radius: 4px; border: 1px solid currentColor; opacity: .6; }
-    @media print {
-      body > *:not(#receipt-print) { display: none !important; }
-      #receipt-print { display: block !important; }
-    }
-  </style>
+  <style>[data-lucide]{width:1.1em;height:1.1em} .tile [data-lucide]{width:1.6rem;height:1.6rem}</style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen overflow-hidden flex flex-col">
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen">
+  <header id="app-header" data-page="inicio" class="h-14 bg-white border-b border-slate-200"></header>
 
-  <!-- ===== Encabezado (logo, menú y usuario los agrega js/layout.js) ===== -->
-  <header id="app-header" data-page="pos" class="h-14 bg-white border-b border-slate-200">
-      <span id="fiscal-badge" class="whitespace-nowrap text-xs px-2 py-1 rounded-md bg-slate-100 text-slate-600"></span>
-      <button id="btn-demand" class="whitespace-nowrap text-sm px-3 py-1.5 rounded-md border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1.5">
-        <i data-lucide="search-x"></i>Faltante <span class="kbd">F2</span>
-      </button>
-      <button id="btn-cash" class="whitespace-nowrap text-sm px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5">
-        <i data-lucide="wallet"></i><span id="cash-label">Caja</span>
-      </button>
-      <button id="btn-alerts" class="relative p-2 rounded-md hover:bg-slate-100" title="Alertas">
-        <i data-lucide="bell"></i>
-        <span id="alert-count" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] grid place-items-center"></span>
-      </button>
-  </header>
-
-  <div id="fiscal-banner" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 text-xs px-5 py-1.5 flex items-center gap-2">
-    <i data-lucide="info"></i><span id="fiscal-banner-text"></span>
-  </div>
-
-  <!-- ===== Cuerpo ===== -->
-  <main class="flex-1 grid grid-cols-[1fr_420px] min-h-0">
-    <!-- Catálogo -->
-    <section class="flex flex-col min-h-0 p-4 gap-3">
-      <div class="relative">
-        <i data-lucide="scan-line" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input id="search" autocomplete="off" autofocus
-          class="w-full pl-10 pr-20 py-3 rounded-xl border border-slate-200 bg-white text-base focus:outline-none focus:ring-2 focus:ring-brand-500"
-          placeholder="Escanea código de barras o busca por nombre, talla, color…" />
-        <span class="kbd absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">F4</span>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+      <div>
+        <h1 id="greeting" class="text-2xl font-semibold text-slate-900">Bienvenida</h1>
+        <p id="today" class="text-sm text-slate-500 first-letter:uppercase"></p>
       </div>
-      <div id="categories" class="flex gap-2 flex-wrap"></div>
-      <div id="results" class="flex-1 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 content-start pb-4"></div>
+      <div id="status" class="flex flex-wrap gap-2 text-sm"></div>
+    </div>
+
+    <section>
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Módulos</h2>
+      <div id="modules" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </section>
 
-    <!-- Carrito -->
-    <aside class="bg-white border-l border-slate-200 flex flex-col min-h-0">
-      <div class="p-4 border-b border-slate-100 flex items-center gap-2">
-        <i data-lucide="user" class="text-slate-400"></i>
-        <select id="customer" class="flex-1 text-sm border border-slate-200 rounded-md px-2 py-1.5 bg-white">
-          <option value="">Consumidor Final</option>
-        </select>
-      </div>
-
-      <div id="cart" class="flex-1 overflow-y-auto divide-y divide-slate-100"></div>
-
-      <div class="border-t border-slate-200 p-4 space-y-3 bg-slate-50">
-        <div id="promos" class="space-y-1"></div>
-        <dl class="text-sm space-y-1">
-          <div class="flex justify-between text-slate-500"><dt>Subtotal</dt><dd id="t-gross">L 0.00</dd></div>
-          <div class="flex justify-between text-emerald-700"><dt>Descuentos</dt><dd id="t-discount">L 0.00</dd></div>
-          <div class="flex justify-between text-slate-500"><dt>Importe gravado 15 %</dt><dd id="t-taxable15">L 0.00</dd></div>
-          <div class="flex justify-between text-slate-500"><dt>ISV 15 %</dt><dd id="t-tax15">L 0.00</dd></div>
-          <div class="flex justify-between text-2xl font-bold pt-1"><dt>Total</dt><dd id="t-total">L 0.00</dd></div>
-        </dl>
-
-        <div class="grid grid-cols-4 gap-1.5" id="pay-methods">
-          <button data-method="cash" class="pm">Efectivo</button>
-          <button data-method="card" class="pm">Tarjeta</button>
-          <button data-method="transfer" class="pm">Transfer.</button>
-          <button data-method="credit" class="pm">Crédito</button>
-        </div>
-
-        <div id="cash-box" class="flex items-center gap-2">
-          <label class="text-sm text-slate-500 shrink-0">Recibido</label>
-          <input id="tendered" inputmode="decimal" class="flex-1 min-w-0 border border-slate-200 rounded-md px-2 py-1.5 text-right" placeholder="0.00" />
-          <span class="text-sm shrink-0">Cambio: <b id="change">L 0.00</b></span>
-        </div>
-        <input id="pay-ref" class="hidden w-full border border-slate-200 rounded-md px-2 py-1.5 text-sm" placeholder="Referencia / # voucher (opcional)" />
-
-        <div class="flex gap-2">
-          <button id="btn-clear" class="px-3 py-3 rounded-lg border border-slate-200 text-slate-500 hover:bg-white" title="Vaciar carrito"><i data-lucide="trash-2"></i></button>
-          <button id="btn-pay" class="flex-1 py-3 rounded-lg bg-brand-600 hover:bg-brand-700 disabled:opacity-40 text-white font-semibold text-lg flex items-center justify-center gap-2">
-            <i data-lucide="check-circle"></i>Cobrar <span class="kbd">F9</span>
-          </button>
-        </div>
-      </div>
-    </aside>
+    <section id="soon-section" class="hidden mt-8">
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Próximamente</h2>
+      <div id="soon" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+    </section>
   </main>
-
-  <!-- ===== Modal genérico ===== -->
-  <div id="modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 grid place-items-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-        <h2 id="modal-title" class="font-semibold"></h2>
-        <button data-close class="p-1 rounded hover:bg-slate-100"><i data-lucide="x"></i></button>
-      </div>
-      <div id="modal-body" class="p-5"></div>
-    </div>
-  </div>
-
-  <div id="receipt-print" class="hidden"></div>
 
   <script src="/js/api.js"></script>
   <script src="/js/layout.js"></script>
-  <script src="/js/pos.js"></script>
+  <script src="/js/inicio.js"></script>
 </body>
 </html>

@@ -22,7 +22,8 @@ window.renderLayout = async function renderLayout() {
         <span class="block text-[15px] -mt-0.5 ml-3 text-slate-700" style="font-family: 'Segoe Script', 'Brush Script MT', cursive">Closet</span>
       </span></a>
     <nav class="flex gap-1 text-sm">
-      ${link('/', 'scan-barcode', 'Vender', 'pos')}
+      ${link('/', 'layout-grid', 'Inicio', 'inicio')}
+      ${link('/vender.html', 'scan-barcode', 'Vender', 'pos')}
       ${isAdmin ? link('/productos.html', 'package', 'Inventario', 'productos') : ''}
       ${isAdmin ? link('/usuarios.html', 'users', 'Usuarios', 'usuarios') : ''}
     </nav>
