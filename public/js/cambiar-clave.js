@@ -8,6 +8,7 @@ const fail = (e) => {
 
 (async () => {
   const st = await api.get('/auth/status');
+  markTestMode(st);
   if (!st.user) { location.href = '/login.html'; return; }
   document.getElementById(st.user.must_change_password ? 'forced' : 'back').classList.remove('hidden');
 })();

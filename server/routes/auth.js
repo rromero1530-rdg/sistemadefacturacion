@@ -4,6 +4,7 @@ const auth = require('../services/auth');
 const { repos } = require('../repositories');
 const m = require('../middleware/security');
 const { AppError } = require('../lib/errors');
+const config = require('../config');
 
 const r = Router();
 const loginLimiter = m.rateLimit({ windowMs: 10 * 60 * 1000, max: 20 });
@@ -13,7 +14,7 @@ const publicUser = (u) => u && ({ id: u.id, name: u.name, username: u.username, 
 
 r.get('/auth/status', (req, res) => {
   res.json({ needsSetup: auth.needsSetup(), setupAllowedHere: m.isLocal(req), user: publicUser(req.user),
-             business: repos().settings.get('business_name') });
+             business: repos().settings.get('business_name'), testMode: config.testMode });
 });
 
 // Crear el primer administrador: solo si no hay usuarios y solo desde la misma computadora

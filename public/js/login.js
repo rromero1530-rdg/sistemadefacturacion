@@ -17,6 +17,7 @@ const goHome = (user) => { location.href = user.must_change_password ? '/cambiar
 
 (async () => {
   const st = await api.get('/auth/status');
+  markTestMode(st);
   if (st.user) return goHome(st.user);
   if (st.needsSetup) show(st.setupAllowedHere ? 'setup-form' : 'setup-remote');
   else show('login-form');

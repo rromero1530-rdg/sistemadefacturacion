@@ -37,3 +37,15 @@ window.toast = (msg, type = 'ok') => {
   setTimeout(() => el.remove(), 3500);
 };
 window.icons = () => window.lucide?.createIcons();
+
+// Franja fija para que nunca se confunda el ambiente de prueba con el sistema real.
+window.markTestMode = (status) => {
+  if (!status?.testMode || document.getElementById('test-banner')) return;
+  document.title = '[PRUEBA] ' + document.title;
+  const el = document.createElement('div');
+  el.id = 'test-banner';
+  el.className = 'shrink-0 w-full bg-amber-400 text-amber-950 text-center text-sm font-semibold py-1.5 tracking-wide';
+  el.textContent = 'AMBIENTE DE PRUEBA · Los datos de aquí no son reales y no afectan a la tienda';
+  if (getComputedStyle(document.body).display === 'grid') el.classList.add('fixed', 'top-0', 'inset-x-0', 'z-[90]');
+  document.body.prepend(el);
+};

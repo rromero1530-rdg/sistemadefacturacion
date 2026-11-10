@@ -1,8 +1,9 @@
 'use strict';
 const auth = require('../services/auth');
 const { AppError } = require('../lib/errors');
+const config = require('../config');
 
-const COOKIE = 'zc_session';
+const COOKIE = config.sessionCookie;
 
 /** Cabeceras de seguridad (equivalente reducido de helmet, sin dependencias). */
 function securityHeaders(req, res, next) {

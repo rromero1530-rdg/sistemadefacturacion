@@ -76,6 +76,16 @@ y ejecuta el instalador de nuevo.
 
 > Si en el futuro se usa desde otra PC o tablet de la red, hay que activar HTTPS antes de cambiar `HOST`.
 
+## Ambiente de prueba (para practicar sin ensuciar los datos reales)
+
+Doble clic en **`scripts\prueba-windows.bat`** (o `npm run prueba:demo` y luego `npm run prueba`). Abre
+`http://localhost:3001` con una franja amarilla **AMBIENTE DE PRUEBA** y datos de demostración
+(`admin / Demo-Admin-2026`, `cajera / Demo-Caja-2026`). Para apagarlo, cierra la ventana negra.
+
+- Base y respaldos propios en `%LOCALAPPDATA%\ZoeCloset-prueba` (ignora `DB_PATH` y `BACKUP_DIR` del `.env`).
+- Puerto 3001 y cookie de sesión distinta: puede estar abierto junto al sistema real (puerto 3000) sin cerrarle la sesión.
+- Empezar de cero: `npm run prueba:borrar` (con el ambiente apagado) y abrirlo de nuevo.
+
 ## Desarrollo (en cualquier PC)
 
 ```bash

@@ -7,6 +7,7 @@ window.renderLayout = async function renderLayout() {
   const status = await api.get('/auth/status');
   if (!status.user) { location.href = '/login.html'; return null; }
   session.user = status.user;
+  markTestMode(status);
   const isAdmin = status.user.role === 'admin';
 
   const link = (href, icon, label, key) => `<a href="${href}" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 ${page === key

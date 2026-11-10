@@ -21,18 +21,27 @@ function defaultBackupDir() {
   return path.join(ROOT, 'respaldos');
 }
 
+// Ambiente de prueba (--prueba): base, respaldos, puerto y cookie propios, para practicar sin tocar
+// los datos reales. Ignora DB_PATH/BACKUP_DIR del .env a propósito, así nunca apunta a la base de la tienda.
+const testMode = process.argv.includes('--prueba') || process.env.APP_ENV === 'prueba';
+const TEST_DIR = path.join(process.env.LOCALAPPDATA || path.join(ROOT, 'database', 'data'), 'ZoeCloset-prueba');
+
 const config = {
   root: ROOT,
-  port: Number(process.env.PORT || 3000),
+  testMode,
+  port: testMode ? Number(process.env.PRUEBA_PORT || 3001) : Number(process.env.PORT || 3000),
   host: process.env.HOST || '127.0.0.1',
   timezone: process.env.TIMEZONE || 'America/Tegucigalpa',
-  dbPath: resolvePath(process.env.DB_PATH || './database/data/zoecloset.db'),
+  dbPath: testMode ? path.join(TEST_DIR, 'prueba.db')
+    : resolvePath(process.env.DB_PATH || './database/data/zoecloset.db'),
   migrationsDir: path.join(ROOT, 'database', 'migrations'),
   backup: {
-    dir: resolvePath(process.env.BACKUP_DIR) || defaultBackupDir(),
+    dir: testMode ? path.join(TEST_DIR, 'respaldos') : resolvePath(process.env.BACKUP_DIR) || defaultBackupDir(),
     intervalHours: Number(process.env.BACKUP_INTERVAL_HOURS || 4),
-    keep: Number(process.env.BACKUP_KEEP || 60),
+    keep: testMode ? 5 : Number(process.env.BACKUP_KEEP || 60),
   },
+  // Los navegadores comparten cookies entre puertos de localhost: nombre distinto para no cerrar la sesión real.
+  sessionCookie: testMode ? 'zc_session_prueba' : 'zc_session',
 };
 
 module.exports = config;
