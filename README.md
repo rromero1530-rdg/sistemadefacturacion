@@ -18,7 +18,7 @@ Abre **PowerShell como administrador** (clic derecho en Inicio → *Terminal (Ad
    ```
 2. Descargar el sistema en `C:\ZoeCloset`:
    ```powershell
-   git clone https://github.com/rromero1530-rdg/sistemadefacturacion.git C:\ZoeCloset
+   git clone -b claude/vibrant-albattani-j6hz9a https://github.com/rromero1530-rdg/sistemadefacturacion.git C:\ZoeCloset
    ```
 3. Ejecutar el instalador (usa tu carpeta de OneDrive para los respaldos):
    ```powershell
