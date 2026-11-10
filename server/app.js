@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const express = require('express');
 const config = require('./config');
 const { AppError } = require('./lib/errors');
+const sec = require('./middleware/security');
 
 // Si las librerías del frontend no se han descargado (npm run vendor), se usan desde CDN.
 const VENDOR_FALLBACK = {
@@ -14,9 +15,17 @@ const VENDOR_FALLBACK = {
 function createApp() {
   const app = express();
   app.disable('x-powered-by');
+  app.use(sec.securityHeaders);
   app.use(express.json({ limit: '1mb' }));
+  app.use(sec.loadSession);
+  app.use('/api', sec.csrfGuard);
 
-  app.get('/api/health', (req, res) => res.json({ ok: true, db: path.basename(config.dbPath) }));
+  // Rutas públicas
+  app.get('/api/health', (req, res) => res.json({ ok: true }));
+  app.use('/api', require('./routes/auth'));
+
+  // Todo lo demás requiere sesión iniciada
+  app.use('/api', sec.requireAuth);
   app.use('/api', require('./routes/catalog'));
   app.use('/api', require('./routes/sales'));
   app.use('/api', require('./routes/partners'));
@@ -30,7 +39,8 @@ function createApp() {
     const cdn = VENDOR_FALLBACK[req.params.file];
     return cdn ? res.redirect(cdn) : next();
   });
-  app.use(express.static(publicDir));
+  app.use(sec.protectPages);
+  app.use(express.static(publicDir, { index: 'index.html' }));
 
   // Manejo centralizado de errores
   // eslint-disable-next-line no-unused-vars

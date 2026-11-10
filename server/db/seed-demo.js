@@ -5,6 +5,7 @@ const { migrate } = require('./migrate');
 const { repos } = require('../repositories');
 const catalog = require('../services/catalog');
 const partners = require('../services/partners');
+const sec = require('../lib/security');
 
 const db = getDb();
 migrate(db);
@@ -23,7 +24,7 @@ for (const [name, margin, minStock] of [['Ropa', 70, 2], ['Accesorios', 90, 3], 
 
 const L = (n) => Math.round(n * 100);
 const products = [
-  { name: 'Blusa de lino', code: 'BLU-LINO', category_id: cat.Ropa, brand: 'Pixel', cost: L(180),
+  { name: 'Blusa de lino', code: 'BLU-LINO', category_id: cat.Ropa, brand: 'Zoe', cost: L(180),
     variants: [['S', 'Blanco', 4], ['M', 'Blanco', 6], ['L', 'Blanco', 2], ['M', 'Beige', 3]] },
   { name: 'Jeans mom fit', code: 'JEAN-MOM', category_id: cat.Ropa, brand: 'Denim Co', cost: L(320), extra_cost_pct: 12,
     variants: [['26', 'Azul', 3], ['28', 'Azul', 5], ['30', 'Azul', 2], ['28', 'Negro', 1]] },
@@ -55,4 +56,12 @@ partners.createCustomer({ name: 'María López', phone: '9999-0000', credit_limi
 partners.createCustomer({ name: 'Boutique Ejemplo S. de R.L.', rtn: '08011999123456', credit_limit: L(10000), credit_days: 15 });
 partners.createSupplier({ name: 'Importadora Textil SPS', phone: '2550-0000', country: 'Honduras' });
 
+// Usuario cajero de prueba SOLO para desarrollo (no usar en la tienda)
+if (process.argv.includes('--with-users')) {
+  r.users.insert({ name: 'Admin Demo', username: 'admin', role: 'admin', password_hash: sec.hashPassword('Demo-Admin-2026'),
+                   must_change_password: 0, password_changed_at: null });
+  r.users.insert({ name: 'Cajera Demo', username: 'cajera', role: 'cajero', password_hash: sec.hashPassword('Demo-Caja-2026'),
+                   must_change_password: 0, password_changed_at: null });
+  console.log('Usuarios demo: admin / Demo-Admin-2026  ·  cajera / Demo-Caja-2026');
+}
 console.log('Datos de demostración cargados ✔');

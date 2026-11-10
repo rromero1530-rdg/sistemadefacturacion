@@ -13,6 +13,7 @@ function repos(db = getDb()) {
     partners: require('./partners')(db),
     demand: require('./demand')(db),
     reports: require('./reports')(db),
+    users: require('./users')(db),
   };
 }
 

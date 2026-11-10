@@ -1,5 +1,5 @@
 -- =====================================================================
--- Pixel POS - Esquema inicial
+-- Zoe Closet - Esquema inicial
 -- Convenciones:
 --   * Montos de dinero en CENTAVOS (INTEGER) para evitar errores de redondeo.
 --     L 1,250.50  ->  125050

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoe Closet · Usuarios</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/js/tw-config.js"></script>
+  <script src="/vendor/lucide.min.js"></script>
+  <style>[data-lucide]{width:1.1em;height:1.1em}</style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased">
+  <header id="app-header" data-page="usuarios" class="h-14 bg-white border-b border-slate-200"></header>
+
+  <main class="max-w-6xl mx-auto p-5 grid lg:grid-cols-[1fr_320px] gap-5">
+    <section class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h1 class="font-semibold">Usuarios del sistema</h1>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-500 text-left">
+          <tr><th class="px-5 py-2 font-medium">Nombre</th><th class="px-3 py-2 font-medium">Usuario</th><th class="px-3 py-2 font-medium">Rol</th>
+              <th class="px-3 py-2 font-medium">Estado</th><th class="px-3 py-2 font-medium">Último ingreso</th><th class="px-3 py-2"></th></tr>
+        </thead>
+        <tbody id="users" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </section>
+
+    <aside class="space-y-5">
+      <form id="new-user" class="bg-white rounded-2xl border border-slate-200 p-5 space-y-3 text-sm">
+        <h2 class="font-semibold flex items-center gap-2"><i data-lucide="user-plus"></i>Nuevo usuario</h2>
+        <div><label class="block text-slate-600 mb-1">Nombre</label><input name="name" required maxlength="80" class="w-full border rounded-md px-3 py-2" /></div>
+        <div><label class="block text-slate-600 mb-1">Usuario</label><input name="username" required maxlength="32" placeholder="ej. maria" class="w-full border rounded-md px-3 py-2" /></div>
+        <div><label class="block text-slate-600 mb-1">Rol</label>
+          <select name="role" class="w-full border rounded-md px-2 py-2">
+            <option value="cajero">Cajero (vender, caja, faltantes, clientes)</option>
+            <option value="admin">Administrador (todo)</option></select></div>
+        <button class="w-full py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium">Crear</button>
+        <p class="text-xs text-slate-500">Se genera una contraseña temporal; el usuario la cambia en su primer ingreso.</p>
+      </form>
+      <div id="temp" class="hidden bg-sage-100 border border-sage-500 rounded-2xl p-5 text-sm"></div>
+    </aside>
+
+    <section class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 font-semibold flex items-center gap-2"><i data-lucide="shield-check"></i>Bitácora de seguridad</div>
+      <div class="max-h-96 overflow-y-auto"><table class="w-full text-sm"><tbody id="audit" class="divide-y divide-slate-100"></tbody></table></div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/usuarios.js"></script>
+</body>
+</html>

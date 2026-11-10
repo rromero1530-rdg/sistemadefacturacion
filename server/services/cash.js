@@ -3,12 +3,12 @@ const { repos } = require('../repositories');
 const { nowLocal, todayLocal } = require('../lib/time');
 const { badRequest, conflict } = require('../lib/errors');
 
-function open({ opening_amount = 0, notes = null }) {
+function open({ opening_amount = 0, notes = null }, user = null) {
   const r = repos();
   if (r.cash.openSession()) throw conflict('Ya hay una caja abierta');
   const amount = Math.round(Number(opening_amount));
   if (!(amount >= 0)) throw badRequest('Monto inicial inválido');
-  const id = r.cash.insertSession({ opened_at: nowLocal(), opening_amount: amount, notes });
+  const id = r.cash.insertSession({ opened_at: nowLocal(), opening_amount: amount, notes, opened_by: user?.id ?? null });
   return summary(id, r);
 }
 
@@ -30,7 +30,7 @@ function summary(sessionId, r = repos()) {
            movementList: movements, expectedCash };
 }
 
-function addMovement({ type, amount, description, category = 'Gastos menores' }) {
+function addMovement({ type, amount, description, category = 'Gastos menores' }, user = null) {
   const r = repos();
   const s = r.cash.openSession();
   if (!s) throw conflict('No hay caja abierta');
@@ -43,22 +43,23 @@ function addMovement({ type, amount, description, category = 'Gastos menores' })
     if (type === 'expense') {
       // El gasto de caja también alimenta la contabilidad (estado de resultados)
       expenseId = r.cash.insertExpense({ expense_date: todayLocal(), category, description, amount: cents,
-                                         payment_method: 'cash', cash_session_id: s.id });
+                                         payment_method: 'cash', cash_session_id: s.id, user_id: user?.id ?? null });
     }
-    r.cash.insertMovement({ session_id: s.id, type, amount: cents, description, expense_id: expenseId, created_at: nowLocal() });
+    r.cash.insertMovement({ session_id: s.id, type, amount: cents, description, expense_id: expenseId, created_at: nowLocal(), user_id: user?.id ?? null });
     return summary(s.id, r);
   })();
 }
 
 /** Cierre y arqueo: compara efectivo contado vs esperado. */
-function close({ counted_cash, notes = null }) {
+function close({ counted_cash, notes = null }, user = null) {
   const r = repos();
   const sum = summary(null, r);
   if (!sum) throw conflict('No hay caja abierta');
   const counted = Math.round(Number(counted_cash));
   if (!(counted >= 0)) throw badRequest('Monto contado inválido');
   r.cash.closeSession({ id: sum.session.id, closed_at: nowLocal(), expected_cash: sum.expectedCash,
-                        counted_cash: counted, difference: counted - sum.expectedCash, notes });
+                        counted_cash: counted, difference: counted - sum.expectedCash, notes,
+                        closed_by: user?.id ?? null });
   return summary(sum.session.id, r);
 }
 

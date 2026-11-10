@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoe Closet · Iniciar sesión</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/js/tw-config.js"></script>
+  <script src="/vendor/lucide.min.js"></script>
+  <style>[data-lucide]{width:1.1em;height:1.1em}</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-brand-50 via-white to-sage-100 text-slate-800 antialiased grid place-items-center p-4">
+  <main class="w-full max-w-sm">
+    <img src="/img/logo.png" alt="Zoe Closet" class="w-64 mx-auto mb-6" />
+    <div class="bg-white/90 backdrop-blur rounded-2xl shadow-xl border border-brand-100 p-6">
+
+      <!-- Inicio de sesión -->
+      <form id="login-form" class="hidden space-y-4" autocomplete="on">
+        <h1 class="text-lg font-semibold text-center">Iniciar sesión</h1>
+        <div><label for="l-user" class="block text-sm text-slate-600 mb-1">Usuario</label>
+          <input id="l-user" name="username" autocomplete="username" required autofocus maxlength="32"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500" /></div>
+        <div><label for="l-pass" class="block text-sm text-slate-600 mb-1">Contraseña</label>
+          <div class="relative">
+            <input id="l-pass" name="password" type="password" autocomplete="current-password" required maxlength="128"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <button type="button" data-toggle="l-pass" class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400" title="Mostrar"><i data-lucide="eye"></i></button>
+          </div>
+          <p id="caps" class="hidden text-xs text-amber-700 mt-1">Bloq Mayús está activado</p></div>
+        <p id="login-error" class="hidden text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2"></p>
+        <button class="w-full py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium">Entrar</button>
+      </form>
+
+      <!-- Asistente inicial -->
+      <form id="setup-form" class="hidden space-y-3">
+        <h1 class="text-lg font-semibold text-center">Configuración inicial</h1>
+        <p class="text-sm text-slate-500 text-center">Crea la cuenta del <b>administrador</b>. Solo se puede hacer una vez y desde esta computadora.</p>
+        <div><label class="block text-sm text-slate-600 mb-1">Nombre completo</label>
+          <input name="name" required maxlength="80" class="w-full border border-slate-200 rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-sm text-slate-600 mb-1">Usuario</label>
+          <input name="username" required maxlength="32" autocomplete="username" placeholder="ej. ruben" class="w-full border border-slate-200 rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-sm text-slate-600 mb-1">Contraseña</label>
+          <input id="s-pass" name="password" type="password" required autocomplete="new-password" maxlength="128" class="w-full border border-slate-200 rounded-lg px-3 py-2" /></div>
+        <div><label class="block text-sm text-slate-600 mb-1">Repetir contraseña</label>
+          <input name="password2" type="password" required autocomplete="new-password" maxlength="128" class="w-full border border-slate-200 rounded-lg px-3 py-2" /></div>
+        <ul class="text-xs text-slate-500 list-disc pl-5">
+          <li>Mínimo 10 caracteres, con letras y números</li><li>Que no contenga tu usuario</li>
+          <li>Tip: usa una frase, ej. <i>Vestido-Rosa-2026</i></li></ul>
+        <p id="setup-error" class="hidden text-sm text-red-700 bg-red-50 rounded-lg px-3 py-2"></p>
+        <button class="w-full py-2.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-medium">Crear administrador</button>
+      </form>
+
+      <p id="setup-remote" class="hidden text-sm text-center text-slate-600">El sistema aún no está configurado. Ábrelo desde la computadora de la tienda para crear el administrador.</p>
+    </div>
+    <p class="text-center text-xs text-slate-400 mt-4">Por seguridad, la sesión se cierra tras un tiempo sin uso.</p>
+  </main>
+  <script src="/js/api.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

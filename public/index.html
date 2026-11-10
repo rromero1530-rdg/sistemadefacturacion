@@ -3,13 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixel POS · Punto de Venta</title>
+  <title>Zoe Closet · Punto de venta</title>
+  <link rel="icon" href="/favicon.ico" />
   <script src="/vendor/tailwind.js"></script>
-  <script>
-    tailwind.config = { theme: { extend: {
-      colors: { brand: { 50:'#fdf2f8',100:'#fce7f3',500:'#db2777',600:'#be185d',700:'#9d174d' } },
-      fontFamily: { sans: ['Inter','Segoe UI','system-ui','sans-serif'] } } } };
-  </script>
+  <script src="/js/tw-config.js"></script>
   <script src="/vendor/lucide.min.js"></script>
   <style>
     [data-lucide] { width: 1.1em; height: 1.1em; }
@@ -22,32 +19,19 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen overflow-hidden flex flex-col">
 
-  <!-- ===== Encabezado ===== -->
-  <header class="bg-white border-b border-slate-200 px-5 h-14 flex items-center gap-3 shrink-0">
-    <div class="flex items-center gap-2 mr-4">
-      <div class="w-8 h-8 rounded-lg bg-brand-600 text-white grid place-items-center"><i data-lucide="shopping-bag"></i></div>
-      <div class="leading-tight">
-        <div id="biz-name" class="font-semibold text-sm">Pixel Hardstore</div>
-        <div class="text-[11px] text-slate-500">Punto de venta</div>
-      </div>
-    </div>
-    <nav class="flex gap-1 text-sm">
-      <a href="/" class="px-3 py-1.5 rounded-md bg-brand-50 text-brand-700 font-medium flex items-center gap-1.5"><i data-lucide="scan-barcode"></i>Vender</a>
-      <a href="/productos.html" class="px-3 py-1.5 rounded-md hover:bg-slate-100 flex items-center gap-1.5"><i data-lucide="package"></i>Inventario</a>
-    </nav>
-    <div class="ml-auto flex items-center gap-2">
-      <span id="fiscal-badge" class="text-xs px-2 py-1 rounded-md bg-slate-100 text-slate-600"></span>
-      <button id="btn-demand" class="text-sm px-3 py-1.5 rounded-md border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1.5">
+  <!-- ===== Encabezado (logo, menú y usuario los agrega js/layout.js) ===== -->
+  <header id="app-header" data-page="pos" class="h-14 bg-white border-b border-slate-200">
+      <span id="fiscal-badge" class="whitespace-nowrap text-xs px-2 py-1 rounded-md bg-slate-100 text-slate-600"></span>
+      <button id="btn-demand" class="whitespace-nowrap text-sm px-3 py-1.5 rounded-md border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center gap-1.5">
         <i data-lucide="search-x"></i>Faltante <span class="kbd">F2</span>
       </button>
-      <button id="btn-cash" class="text-sm px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5">
+      <button id="btn-cash" class="whitespace-nowrap text-sm px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5">
         <i data-lucide="wallet"></i><span id="cash-label">Caja</span>
       </button>
       <button id="btn-alerts" class="relative p-2 rounded-md hover:bg-slate-100" title="Alertas">
         <i data-lucide="bell"></i>
         <span id="alert-count" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] grid place-items-center"></span>
       </button>
-    </div>
   </header>
 
   <div id="fiscal-banner" class="hidden bg-amber-50 border-b border-amber-200 text-amber-900 text-xs px-5 py-1.5 flex items-center gap-2">
@@ -128,6 +112,7 @@
   <div id="receipt-print" class="hidden"></div>
 
   <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
   <script src="/js/pos.js"></script>
 </body>
 </html>

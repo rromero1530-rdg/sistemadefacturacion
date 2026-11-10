@@ -17,7 +17,7 @@ function resolvePath(p) {
 
 function defaultBackupDir() {
   const oneDrive = process.env.OneDriveCommercial || process.env.OneDrive;
-  if (oneDrive) return path.join(oneDrive, 'PixelPOS', 'respaldos');
+  if (oneDrive) return path.join(oneDrive, 'Facturacion', 'respaldos');
   return path.join(ROOT, 'respaldos');
 }
 
@@ -26,7 +26,7 @@ const config = {
   port: Number(process.env.PORT || 3000),
   host: process.env.HOST || '127.0.0.1',
   timezone: process.env.TIMEZONE || 'America/Tegucigalpa',
-  dbPath: resolvePath(process.env.DB_PATH || './database/data/pos.db'),
+  dbPath: resolvePath(process.env.DB_PATH || './database/data/zoecloset.db'),
   migrationsDir: path.join(ROOT, 'database', 'migrations'),
   backup: {
     dir: resolvePath(process.env.BACKUP_DIR) || defaultBackupDir(),

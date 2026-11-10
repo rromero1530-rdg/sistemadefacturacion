@@ -2,9 +2,9 @@
 module.exports = (db) => ({
   insert(d) {
     return db.prepare(`INSERT INTO unmet_demand (description, reason, category_id, variant_id, size, color, qty,
-                                                 customer_name, customer_phone, notes, created_at)
+                                                 customer_name, customer_phone, notes, created_at, user_id)
                        VALUES (@description, @reason, @category_id, @variant_id, @size, @color, @qty,
-                               @customer_name, @customer_phone, @notes, @created_at)`).run(d).lastInsertRowid;
+                               @customer_name, @customer_phone, @notes, @created_at, @user_id)`).run({ user_id: null, ...d }).lastInsertRowid;
   },
   list({ status, limit = 200 }) {
     return db.prepare(`SELECT d.*, c.name AS category_name FROM unmet_demand d

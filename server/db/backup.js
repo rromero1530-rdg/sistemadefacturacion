@@ -13,7 +13,7 @@ async function backupNow(reason = 'manual') {
   const dir = config.backup.dir;
   fs.mkdirSync(dir, { recursive: true });
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15);
-  const finalPath = path.join(dir, `pos-${stamp}-${reason}.db`);
+  const finalPath = path.join(dir, `zoecloset-${stamp}-${reason}.db`);
   const tmpPath = finalPath + '.tmp';
 
   await getDb().backup(tmpPath);
@@ -23,7 +23,7 @@ async function backupNow(reason = 'manual') {
 }
 
 function prune(dir) {
-  const files = fs.readdirSync(dir).filter((f) => /^pos-.*\.db$/.test(f)).sort();
+  const files = fs.readdirSync(dir).filter((f) => /^zoecloset-.*\.db$/.test(f)).sort();
   const excess = files.length - config.backup.keep;
   for (let i = 0; i < excess; i++) fs.rmSync(path.join(dir, files[i]), { force: true });
 }

@@ -7,23 +7,23 @@ module.exports = (db) => ({
     return db.prepare('SELECT * FROM cash_sessions WHERE id = ?').get(id);
   },
   insertSession(s) {
-    return db.prepare(`INSERT INTO cash_sessions (opened_at, opening_amount, notes)
-                       VALUES (@opened_at, @opening_amount, @notes)`).run(s).lastInsertRowid;
+    return db.prepare(`INSERT INTO cash_sessions (opened_at, opening_amount, notes, opened_by)
+                       VALUES (@opened_at, @opening_amount, @notes, @opened_by)`).run({ opened_by: null, ...s }).lastInsertRowid;
   },
   closeSession(c) {
     db.prepare(`UPDATE cash_sessions SET status = 'closed', closed_at = @closed_at, expected_cash = @expected_cash,
-                counted_cash = @counted_cash, difference = @difference,
-                notes = COALESCE(@notes, notes) WHERE id = @id`).run(c);
+                counted_cash = @counted_cash, difference = @difference, closed_by = @closed_by,
+                notes = COALESCE(@notes, notes) WHERE id = @id`).run({ closed_by: null, ...c });
   },
   insertMovement(m) {
-    return db.prepare(`INSERT INTO cash_movements (session_id, type, amount, description, expense_id, created_at)
-                       VALUES (@session_id, @type, @amount, @description, @expense_id, @created_at)`)
-      .run({ expense_id: null, ...m }).lastInsertRowid;
+    return db.prepare(`INSERT INTO cash_movements (session_id, type, amount, description, expense_id, created_at, user_id)
+                       VALUES (@session_id, @type, @amount, @description, @expense_id, @created_at, @user_id)`)
+      .run({ expense_id: null, user_id: null, ...m }).lastInsertRowid;
   },
   insertExpense(e) {
-    return db.prepare(`INSERT INTO expenses (expense_date, category, description, amount, payment_method, cash_session_id)
-                       VALUES (@expense_date, @category, @description, @amount, @payment_method, @cash_session_id)`)
-      .run(e).lastInsertRowid;
+    return db.prepare(`INSERT INTO expenses (expense_date, category, description, amount, payment_method, cash_session_id, user_id)
+                       VALUES (@expense_date, @category, @description, @amount, @payment_method, @cash_session_id, @user_id)`)
+      .run({ user_id: null, ...e }).lastInsertRowid;
   },
   movements(sessionId) {
     return db.prepare('SELECT * FROM cash_movements WHERE session_id = ? ORDER BY id').all(sessionId);

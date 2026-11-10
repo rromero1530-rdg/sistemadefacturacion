@@ -61,7 +61,7 @@ function quote(items, r = repos()) {
  * Registra una venta completa en una sola transacción:
  * numeración fiscal, líneas, pagos, inventario, crédito.
  */
-function createSale(input) {
+function createSale(input, user = null) {
   const r = repos();
   return r.db.transaction(() => {
     const session = r.cash.openSession();
@@ -113,6 +113,7 @@ function createSale(input) {
       customer_name: customer?.name || input.customer_name || 'Consumidor Final',
       customer_rtn: customer?.rtn || input.customer_rtn || null,
       cash_session_id: session.id,
+      user_id: user?.id ?? null,
       gross_amount: q.gross, discount_amount: q.discount, exempt_amount: q.exempt,
       taxable15_amount: q.taxable15, taxable18_amount: q.taxable18,
       tax15_amount: q.tax15, tax18_amount: q.tax18, total: q.total, cost_total: q.cost,

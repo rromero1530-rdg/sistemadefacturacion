@@ -1,61 +1,96 @@
-# Pixel POS — Sistema de facturación, inventario y punto de venta
+# Zoe Closet — Sistema de facturación, inventario y punto de venta
 
-Sistema **100 % local** (Windows, sin suscripciones) para tienda de ropa, accesorios y calzado de dama.
+Sistema **100 % local** (Windows, sin suscripciones) para la tienda de ropa, accesorios y calzado **Zoe Closet**.
 Preparado para la normativa de facturación de la **SAR (Honduras)** y diseñado para migrar a la nube
 (PostgreSQL + servidor web) cuando se necesite.
 
-## Inicio rápido (Windows)
+## Instalación en la PC de la tienda (una sola vez)
 
-1. Instala **Node.js 22 LTS** desde <https://nodejs.org>.
-2. Clona el repositorio y entra a la carpeta:
-   ```bash
-   git clone https://github.com/rromero1530-rdg/sistemadefacturacion.git
-   ```
-   ```bash
-   cd sistemadefacturacion
-   ```
-3. Instala dependencias y descarga las librerías de interfaz para trabajar **sin internet**:
-   ```bash
-   npm install
-   ```
-   ```bash
-   npm run vendor
-   ```
-4. Copia `.env.example` como `.env` y ajusta `BACKUP_DIR` (ver sección OneDrive).
-5. (Opcional) Carga datos de ejemplo:
-   ```bash
-   npm run seed:demo
-   ```
-6. Inicia el sistema y abre <http://localhost:3000>:
-   ```bash
-   npm start
-   ```
-   También puedes hacer doble clic en `scripts\iniciar-windows.bat`.
+El sistema se instala como **servicio de Windows**: arranca solo al encender la computadora y queda
+disponible para **cualquier usuario de Windows** que inicie sesión en la PC (cada persona entra con su propio
+usuario y contraseña de Zoe Closet).
 
-## Base de datos y OneDrive (importante)
+Abre **PowerShell como administrador** (clic derecho en Inicio → *Terminal (Administrador)*) y ejecuta:
 
-> ⚠️ **No pongas el archivo `.db` vivo dentro de OneDrive.** OneDrive sincroniza el archivo mientras SQLite
-> lo está escribiendo (y no entiende los archivos `-wal`/`-shm`), lo que puede **corromper la base** o generar
-> copias en conflicto.
+1. Instalar Node.js y Git (si no los tienes); luego **cierra y vuelve a abrir** PowerShell como administrador:
+   ```powershell
+   winget install OpenJS.NodeJS.LTS Git.Git
+   ```
+2. Descargar el sistema en `C:\ZoeCloset`:
+   ```powershell
+   git clone https://github.com/rromero1530-rdg/sistemadefacturacion.git C:\ZoeCloset
+   ```
+3. Ejecutar el instalador (usa tu carpeta de OneDrive para los respaldos):
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File C:\ZoeCloset\scripts\instalar-windows.ps1
+   ```
+   Para otra carpeta de respaldos agrega `-BackupDir "C:\Users\TuUsuario\OneDrive\Facturacion\respaldos"`.
+4. Se abre el navegador con el **asistente inicial**: crea la cuenta de **Administrador**.
+5. En **Usuarios** crea una cuenta para cada persona (cajero o administrador).
 
-La configuración recomendada (la que trae el sistema):
+Aparece el ícono **Zoe Closet** en el escritorio y el menú Inicio de todos los usuarios.
 
-| Qué | Dónde | Variable |
+| Acción | Comando (PowerShell como administrador) |
+|---|---|
+| Actualizar a la última versión | `powershell -ExecutionPolicy Bypass -File C:\ZoeCloset\scripts\instalar-windows.ps1 -Update` |
+| Quitar el servicio (conserva datos) | `powershell -ExecutionPolicy Bypass -File C:\ZoeCloset\scripts\instalar-windows.ps1 -Uninstall` |
+| Ver registro del servidor | `notepad C:\ProgramData\ZoeCloset\logs\servidor.log` |
+
+### ¿Dónde se guarda cada cosa?
+
+| Qué | Dónde | Por qué |
 |---|---|---|
-| Base de datos viva | Disco local: `database/data/pos.db` | `DB_PATH` |
-| Respaldos automáticos | Carpeta de OneDrive | `BACKUP_DIR` |
+| Programa | `C:\ZoeCloset` | Todos los usuarios de Windows pueden ejecutarlo; solo un administrador puede modificarlo. |
+| Base de datos viva | `C:\ProgramData\ZoeCloset\data\zoecloset.db` | Accesible por el servicio aunque nadie haya iniciado sesión. Los usuarios normales de Windows **no** pueden copiarla ni alterarla. |
+| **Respaldos** | `%OneDrive%\Facturacion\respaldos` | Copias completas y consistentes que OneDrive sube a la nube. |
 
-Los respaldos se generan con la API oficial de backup de SQLite (copia consistente aunque el sistema esté en uso):
+> ⚠️ **¿Por qué no está todo dentro de OneDrive?**
+> 1. La carpeta `C:\Users\<tu usuario>\OneDrive` pertenece a tu perfil: **otros usuarios de Windows no tienen acceso**.
+> 2. OneDrive puede dejar archivos "solo en la nube" y el servicio no podría arrancar antes de que inicies sesión.
+> 3. OneDrive sincroniza el archivo mientras SQLite escribe en él y puede **corromper la base**.
+>
+> Por eso la base vive en `ProgramData` y en OneDrive se guardan los **respaldos** (al iniciar, cada 4 horas y en cada
+> cierre de caja; se conservan los últimos 60). Tu información queda en `OneDrive\Facturacion` y en la nube.
 
-- al iniciar el servidor,
-- cada `BACKUP_INTERVAL_HOURS` horas (4 por defecto),
-- **al cerrar caja**,
-- manualmente con `npm run backup` o `POST /api/backup`.
+**Restaurar un respaldo:** quita el servicio (`-Uninstall`), copia el respaldo deseado sobre
+`C:\ProgramData\ZoeCloset\data\zoecloset.db`, borra los archivos `zoecloset.db-wal` y `zoecloset.db-shm` si existen,
+y ejecuta el instalador de nuevo.
 
-Se conservan los últimos `BACKUP_KEEP` archivos. Si `BACKUP_DIR` queda vacío se usa automáticamente
-`%OneDriveCommercial%` (Microsoft 365 empresarial) o `%OneDrive%` + `\PixelPOS\respaldos`.
+## Seguridad
 
-**Restaurar:** detén el sistema, copia el respaldo deseado sobre `database/data/pos.db` y vuelve a iniciar.
+- **Login propio** con usuario y contraseña; roles **Administrador** (todo) y **Cajero** (vender, caja, faltantes, clientes).
+- Contraseñas guardadas con **scrypt** + sal aleatoria (nunca en texto plano). Política: mínimo 10 caracteres, letras y
+  números, no puede contener el usuario ni ser común.
+- Usuarios nuevos reciben una **contraseña temporal** y deben cambiarla en su primer ingreso.
+- **Bloqueo de cuenta** por 15 min tras 5 intentos fallidos + límite de intentos por equipo. El mensaje de error no
+  revela si el usuario existe.
+- Sesiones del lado del servidor: cookie `HttpOnly` + `SameSite=Strict`; en la base solo se guarda el *hash* del
+  token. Expira tras **30 min sin uso** (configurable) y a las **12 h** como máximo. Cambiar la contraseña,
+  desactivar un usuario o cambiar su rol cierra sus sesiones.
+- Protección **CSRF**, cabeceras de seguridad (CSP estricta sin scripts en línea, anti-clickjacking, `nosniff`).
+- El **primer administrador** solo puede crearse desde la propia PC y una sola vez.
+- Siempre debe existir al menos un administrador activo.
+- **Bitácora de seguridad** (inicios de sesión, fallos, bloqueos, cambios de usuarios, caja y configuración) en *Usuarios*.
+- El servidor solo escucha en `127.0.0.1` (no es accesible desde la red). El servicio corre con la cuenta de
+  **mínimo privilegio** *Servicio local*, no como administrador.
+
+> Si en el futuro se usa desde otra PC o tablet de la red, hay que activar HTTPS antes de cambiar `HOST`.
+
+## Desarrollo (en cualquier PC)
+
+```bash
+npm install
+```
+```bash
+npm run vendor
+```
+```bash
+npm run seed:demo -- --with-users
+```
+```bash
+npm run dev
+```
+Usuarios de prueba (solo desarrollo): `admin / Demo-Admin-2026` y `cajera / Demo-Caja-2026`. Pruebas: `npm test`.
 
 ## Estructura
 
@@ -64,8 +99,11 @@ Se conservan los últimos `BACKUP_KEEP` archivos. Si `BACKUP_DIR` queda vacío s
 │   ├── migrations/001_esquema_inicial.sql   # esquema relacional completo
 │   └── data/                                # pos.db (ignorado por git)
 ├── public/                                  # frontend (HTML + Tailwind + Lucide)
-│   ├── index.html  js/pos.js                # Punto de venta
+│   ├── login.html  cambiar-clave.html       # Acceso
+│   ├── index.html                           # Punto de venta
 │   ├── productos.html                       # Alta de productos con cálculo de precio
+│   ├── usuarios.html                        # Usuarios y bitácora (solo admin)
+│   ├── js/  img/                            # scripts (sin código en línea) y logo
 │   └── vendor/                              # librerías descargadas (npm run vendor)
 ├── server/
 │   ├── index.js / app.js / config.js        # arranque, Express, configuración
@@ -73,8 +111,9 @@ Se conservan los últimos `BACKUP_KEEP` archivos. Si `BACKUP_DIR` queda vacío s
 │   ├── repositories/  ÚNICO lugar con SQL (capa de datos)
 │   ├── services/      reglas de negocio (precios, promociones, ventas, caja, fiscal, alertas, reportes)
 │   ├── routes/        endpoints HTTP /api/*
+│   ├── middleware/    seguridad: sesión, roles, CSRF, cabeceras, límite de intentos
 │   └── lib/           dinero, fechas, errores
-├── scripts/           vendor.js, iniciar-windows.bat
+├── scripts/           instalar-windows.ps1, vendor.js, iniciar-windows.bat
 └── tests/             pruebas (npm test)
 ```
 
@@ -140,20 +179,16 @@ precio final  = precio base × (1 + ISV) → redondeado hacia arriba a L 5 (pric
 | GET | `/api/reports/sales?group=day\|week\|month` · `top-products` · `profit-by-category` · `income-statement` · `unmet-demand` | Reportes |
 | GET/PUT | `/api/settings` | Configuración |
 | GET/POST | `/api/fiscal/status` · `/api/fiscal/cai` | Estado fiscal y C.A.I. |
+| GET/POST | `/api/auth/status` · `login` · `logout` · `setup` · `change-password` | Acceso |
+| GET/POST/PATCH | `/api/users` · `/api/users/:id/reset-password` · `/api/audit` | Usuarios y bitácora (admin) |
 
-## Desarrollo
-
-```bash
-npm run dev
-```
-```bash
-npm test
-```
+Todas las rutas (excepto `/api/auth/*` y `/api/health`) requieren sesión; las peticiones que modifican datos
+requieren la cabecera `X-Requested-With: ZoeCloset`.
 
 ## Próximos pasos sugeridos
 
 1. Pantallas de reportes, clientes, proveedores, promociones y configuración (la API ya existe).
-2. Usuarios con PIN y permisos (tabla `users` ya creada) + bitácora de anulaciones.
+2. Bitácora de anulaciones de ventas con autorización de administrador.
 3. Anulación de ventas y devoluciones/cambios de talla (muy comunes en ropa).
 4. Impresión de etiquetas con código de barras y ticket térmico de 80 mm.
 5. Envío de comprobantes por WhatsApp.

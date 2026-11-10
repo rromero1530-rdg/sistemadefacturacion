@@ -1,7 +1,7 @@
 {
-  "name": "pixel-pos",
+  "name": "zoe-closet-pos",
   "version": "0.1.0",
-  "description": "Sistema local de facturación, inventario y punto de venta para tienda de ropa y accesorios (Honduras - SAR)",
+  "description": "Zoe Closet - Sistema local de facturación, inventario y punto de venta (Honduras - SAR)",
   "main": "server/index.js",
   "type": "commonjs",
   "private": true,

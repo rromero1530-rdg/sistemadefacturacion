@@ -1,5 +1,5 @@
 // =====================================================================
-// Pixel POS - Punto de venta
+// Zoe Closet - Punto de venta
 // El servidor es la fuente de verdad de precios, promociones e ISV:
 // el carrito solo guarda {variant_id, qty} y pide /sales/quote en cada cambio.
 // =====================================================================
@@ -20,6 +20,8 @@ const METHOD_LABEL = { cash: 'Efectivo', card: 'Tarjeta', transfer: 'Transferenc
 
 // ---------------- Arranque ----------------
 async function init() {
+  const status = await renderLayout();
+  if (!status) return;
   document.querySelectorAll('.pm').forEach((b) => {
     b.className = 'pm text-sm py-2 rounded-md border border-slate-200 bg-white hover:border-brand-500';
     b.onclick = () => setMethod(b.dataset.method);
@@ -31,7 +33,6 @@ async function init() {
   ]);
   state.settings = settings;
   state.categories = categories;
-  $('#biz-name').textContent = settings.business_name || 'Mi tienda';
   $('#customer').insertAdjacentHTML('beforeend',
     customers.map((c) => `<option value="${c.id}">${esc(c.name)}${c.rtn ? ' · RTN ' + esc(c.rtn) : ''}</option>`).join(''));
   renderCategories();
@@ -53,7 +54,7 @@ function bindEvents() {
   $('#tendered').addEventListener('input', updateChange);
   $('#btn-pay').onclick = checkout;
   $('#btn-clear').onclick = () => { if (state.cart.size && confirm('¿Vaciar carrito?')) { state.cart.clear(); renderCart(); } };
-  $('#btn-demand').onclick = openDemandModal;
+  $('#btn-demand').onclick = () => openDemandModal();
   $('#btn-cash').onclick = openCashModal;
   $('#btn-alerts').onclick = openAlertsModal;
   $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeModal(); });
@@ -97,7 +98,8 @@ function renderResults(items) {
   if (!items.length) {
     $('#results').innerHTML = `<div class="col-span-full text-center text-slate-500 py-16">
       <p class="mb-3">Sin resultados.</p>
-      <button class="text-amber-700 underline" onclick="openDemandModal($('#search').value)">Registrar como faltante</button></div>`;
+      <button id="empty-demand" class="text-amber-700 underline">Registrar como faltante</button></div>`;
+    $('#empty-demand').onclick = () => openDemandModal($('#search').value);
     return;
   }
   $('#results').innerHTML = items.map((v) => {
@@ -289,9 +291,10 @@ async function showReceipt(sale) {
     </div>
     <div class="border rounded-lg p-3 bg-slate-50 max-h-72 overflow-y-auto">${html}</div>
     <div class="flex gap-2 mt-4">
-      <button onclick="window.print()" class="flex-1 py-2.5 rounded-lg border border-slate-200 flex items-center justify-center gap-2"><i data-lucide="printer"></i>Imprimir</button>
+      <button id="btn-print" class="flex-1 py-2.5 rounded-lg border border-slate-200 flex items-center justify-center gap-2"><i data-lucide="printer"></i>Imprimir</button>
       <button data-close class="flex-1 py-2.5 rounded-lg bg-brand-600 text-white font-medium">Nueva venta</button>
     </div>`);
+  $('#btn-print').onclick = () => window.print();
 }
 
 // ---------------- Demanda insatisfecha ----------------
@@ -420,7 +423,7 @@ async function refreshFiscal() {
   const f = await api.get('/fiscal/status');
   const formal = f.mode === 'formal';
   $('#fiscal-badge').textContent = formal ? 'Factura SAR' : 'Comprobante interno';
-  $('#fiscal-badge').className = `text-xs px-2 py-1 rounded-md ${formal ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`;
+  $('#fiscal-badge').className = `whitespace-nowrap text-xs px-2 py-1 rounded-md ${formal ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'}`;
   const w = f.warnings[0];
   $('#fiscal-banner').classList.toggle('hidden', !w);
   if (w) {
