@@ -120,4 +120,25 @@ function receiveStock({ supplier_id = null, document_number = null, notes = null
   })();
 }
 
-module.exports = { previewPrice, createProduct, receiveStock, internalBarcode };
+/** Crea una categoría validando nombre único (sin distinguir mayúsculas), margen, stock mínimo e impuesto. */
+function createCategory({ name, margin_pct = null, min_stock = 2, tax_rate_id = null } = {}) {
+  const r = repos();
+  const clean = String(name ?? '').trim().replace(/\s+/g, ' ');
+  if (!clean) throw badRequest('El nombre de la categoría es obligatorio');
+  if (clean.length > 60) throw badRequest('El nombre es demasiado largo (máximo 60 caracteres)');
+  const lower = clean.toLocaleLowerCase('es');
+  // SQLite lower() no maneja tildes/ñ, por eso se compara en JavaScript.
+  if (r.catalog.allCategoryNames().some((n) => n.toLocaleLowerCase('es') === lower)) {
+    throw badRequest(`Ya existe la categoría "${clean}"`);
+  }
+  const margin = margin_pct === '' || margin_pct == null ? null : Number(margin_pct);
+  if (margin != null && !(Number.isFinite(margin) && margin >= 0 && margin < 1000)) throw badRequest('Margen inválido');
+  const minStock = min_stock === '' || min_stock == null ? 2 : Number(min_stock);
+  if (!(Number.isInteger(minStock) && minStock >= 0)) throw badRequest('Stock mínimo inválido');
+  const tax = tax_rate_id === '' || tax_rate_id == null ? null : Number(tax_rate_id);
+  if (tax != null && !r.catalog.taxRate(tax)) throw badRequest('Impuesto inválido');
+  const id = r.catalog.insertCategory({ name: clean, margin_pct: margin, min_stock: minStock, tax_rate_id: tax });
+  return r.catalog.category(id);
+}
+
+module.exports = { previewPrice, createProduct, receiveStock, internalBarcode, createCategory };

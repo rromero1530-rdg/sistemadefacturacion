@@ -9,7 +9,7 @@ const admin = requireRole('admin');
 
 const r = Router();
 r.get('/categories', (req, res) => res.json(repos().catalog.categories()));
-r.post('/categories', admin, (req, res) => res.status(201).json({ id: repos().catalog.insertCategory(req.body) }));
+r.post('/categories', admin, (req, res) => res.status(201).json(catalog.createCategory(req.body)));
 r.get('/tax-rates', (req, res) => res.json(repos().catalog.taxRates()));
 
 r.get('/products', (req, res) =>

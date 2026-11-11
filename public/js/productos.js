@@ -58,10 +58,47 @@ f.onsubmit = async (e) => {
   } catch (err) { toast(err.message, 'error'); }
 };
 
+async function loadCategories(selectId) {
+  const cats = await api.get('/categories');
+  f.category_id.innerHTML = cats.length
+    ? cats.map((c) => `<option value="${c.id}">${esc(c.name)} (margen ${c.margin_pct ?? 'global'} %)</option>`).join('')
+    : '<option value="">Primero crea una categoría →</option>';
+  if (selectId) f.category_id.value = String(selectId);
+  preview();
+}
+
+// ---------------- Nueva categoría ----------------
+const dlg = document.getElementById('cat-dialog');
+const cf = document.getElementById('cat-form');
+const catError = document.getElementById('cat-error');
+let defaultTaxId = '';
+document.getElementById('new-cat').onclick = () => {
+  cf.reset(); cf.tax_rate_id.value = defaultTaxId; catError.classList.add('hidden'); dlg.showModal(); cf.name.focus();
+};
+document.getElementById('cat-cancel').onclick = () => dlg.close();
+cf.onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const cat = await api.post('/categories', {
+      name: cf.name.value, margin_pct: cf.margin_pct.value.trim(), min_stock: cf.min_stock.value.trim(),
+      tax_rate_id: cf.tax_rate_id.value,
+    });
+    dlg.close();
+    await loadCategories(cat.id);
+    toast(`Categoría "${cat.name}" creada`);
+  } catch (err) {
+    catError.textContent = err.message; catError.classList.remove('hidden');
+  }
+};
+
 (async () => {
   if (!(await renderLayout())) return;
-  const [cats, taxes] = await Promise.all([api.get('/categories'), api.get('/tax-rates')]);
-  f.category_id.innerHTML = cats.map((c) => `<option value="${c.id}">${esc(c.name)} (margen ${c.margin_pct ?? 'global'} %)</option>`).join('');
-  f.tax_rate_id.insertAdjacentHTML('beforeend', taxes.map((t) => `<option value="${t.id}">${esc(t.name)}</option>`).join(''));
-  addVariant(); preview(); icons();
+  const taxes = await api.get('/tax-rates');
+  const taxOpts = taxes.map((t) => `<option value="${t.id}">${esc(t.name)}</option>`).join('');
+  f.tax_rate_id.insertAdjacentHTML('beforeend', taxOpts);
+  cf.tax_rate_id.innerHTML = taxOpts;
+  const isv15 = taxes.find((t) => t.code === 'ISV15');
+  if (isv15) defaultTaxId = String(isv15.id);
+  await loadCategories();
+  addVariant(); icons();
 })();

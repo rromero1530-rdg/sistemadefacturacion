@@ -93,3 +93,17 @@ test('respaldo consistente', async () => {
   const file = await backupNow('test');
   assert.ok(fs.existsSync(file));
 });
+
+test('crear categoría: valida nombre único sin importar mayúsculas y datos', () => {
+  const c = catalog.createCategory({ name: '  Blusas   de  seda ', margin_pct: '65', min_stock: '4', tax_rate_id: String(isv) });
+  assert.equal(c.name, 'Blusas de seda');
+  assert.equal(c.margin_pct, 65);
+  assert.equal(c.min_stock, 4);
+  assert.equal(c.tax_rate_id, isv);
+  assert.equal(catalog.createCategory({ name: 'Cinturones', margin_pct: '' }).margin_pct, null);
+  assert.throws(() => catalog.createCategory({ name: 'BOLSOS' }), /Ya existe/);
+  assert.throws(() => catalog.createCategory({ name: '   ' }), /obligatorio/);
+  assert.throws(() => catalog.createCategory({ name: 'X', margin_pct: 'abc' }), /Margen/);
+  assert.throws(() => catalog.createCategory({ name: 'Y', min_stock: '-1' }), /Stock/);
+  assert.throws(() => catalog.createCategory({ name: 'Z', tax_rate_id: 9999 }), /Impuesto/);
+});
