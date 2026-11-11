@@ -8,8 +8,12 @@ module.exports = (db) => ({
   category(id) {
     return db.prepare('SELECT * FROM categories WHERE id = ?').get(id);
   },
-  allCategoryNames() {   // incluye inactivas: el nombre es UNIQUE en la tabla
-    return db.prepare('SELECT name FROM categories').pluck().all();
+  allCategoryNames(exceptId = null) {   // incluye inactivas: el nombre es UNIQUE en la tabla
+    return db.prepare('SELECT name FROM categories WHERE id IS NOT ?').pluck().all(exceptId);
+  },
+  updateCategory(id, c) {
+    db.prepare(`UPDATE categories SET name = @name, margin_pct = @margin_pct, tax_rate_id = @tax_rate_id,
+                min_stock = @min_stock WHERE id = @id`).run({ ...c, id });
   },
   insertCategory(c) {
     return db.prepare(`INSERT INTO categories (name, parent_id, margin_pct, tax_rate_id, min_stock, slow_days)

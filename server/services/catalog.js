@@ -120,16 +120,15 @@ function receiveStock({ supplier_id = null, document_number = null, notes = null
   })();
 }
 
-/** Crea una categoría validando nombre único (sin distinguir mayúsculas), margen, stock mínimo e impuesto. */
-function createCategory({ name, margin_pct = null, min_stock = 2, tax_rate_id = null } = {}) {
-  const r = repos();
+/** Valida y normaliza los datos de una categoría. exceptId: la propia categoría al editar. */
+function cleanCategory(r, { name, margin_pct = null, min_stock = 2, tax_rate_id = null } = {}, exceptId = null) {
   const clean = String(name ?? '').trim().replace(/\s+/g, ' ');
   if (!clean) throw badRequest('El nombre de la categoría es obligatorio');
   if (clean.length > 60) throw badRequest('El nombre es demasiado largo (máximo 60 caracteres)');
-  const lower = clean.toLocaleLowerCase('es');
-  // SQLite lower() no maneja tildes/ñ, por eso se compara en JavaScript.
-  if (r.catalog.allCategoryNames().some((n) => n.toLocaleLowerCase('es') === lower)) {
-    throw badRequest(`Ya existe la categoría "${clean}"`);
+  // "Calzado", "calzado" y "Cálzado" cuentan como el mismo nombre (SQLite no sabe ignorar tildes).
+  const key = (s) => s.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('es');
+  if (r.catalog.allCategoryNames(exceptId).some((n) => key(n) === key(clean))) {
+    throw badRequest('Ya existe la categoría "' + clean + '"');
   }
   const margin = margin_pct === '' || margin_pct == null ? null : Number(margin_pct);
   if (margin != null && !(Number.isFinite(margin) && margin >= 0 && margin < 1000)) throw badRequest('Margen inválido');
@@ -137,8 +136,25 @@ function createCategory({ name, margin_pct = null, min_stock = 2, tax_rate_id = 
   if (!(Number.isInteger(minStock) && minStock >= 0)) throw badRequest('Stock mínimo inválido');
   const tax = tax_rate_id === '' || tax_rate_id == null ? null : Number(tax_rate_id);
   if (tax != null && !r.catalog.taxRate(tax)) throw badRequest('Impuesto inválido');
-  const id = r.catalog.insertCategory({ name: clean, margin_pct: margin, min_stock: minStock, tax_rate_id: tax });
+  return { name: clean, margin_pct: margin, min_stock: minStock, tax_rate_id: tax };
+}
+
+/** Crea una categoría (nombre único sin distinguir mayúsculas ni tildes). */
+function createCategory(input) {
+  const r = repos();
+  const id = r.catalog.insertCategory(cleanCategory(r, input));
   return r.catalog.category(id);
 }
 
-module.exports = { previewPrice, createProduct, receiveStock, internalBarcode, createCategory };
+/**
+ * Modifica una categoría. Stock mínimo e impuesto se aplican de inmediato a sus productos (salvo los que
+ * tengan valor propio); el margen solo afecta productos nuevos, porque los precios ya guardados no cambian.
+ */
+function updateCategory(id, input) {
+  const r = repos();
+  if (!r.catalog.category(id)) throw notFound('Categoría no encontrada');
+  r.catalog.updateCategory(id, cleanCategory(r, input, id));
+  return r.catalog.category(id);
+}
+
+module.exports = { previewPrice, createProduct, receiveStock, internalBarcode, createCategory, updateCategory };

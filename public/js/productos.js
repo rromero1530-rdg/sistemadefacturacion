@@ -58,8 +58,10 @@ f.onsubmit = async (e) => {
   } catch (err) { toast(err.message, 'error'); }
 };
 
+let categories = [];
 async function loadCategories(selectId) {
-  const cats = await api.get('/categories');
+  const cats = categories = await api.get('/categories');
+  document.getElementById('edit-cat').classList.toggle('hidden', !cats.length);
   f.category_id.innerHTML = cats.length
     ? cats.map((c) => `<option value="${c.id}">${esc(c.name)} (margen ${c.margin_pct ?? 'global'} %)</option>`).join('')
     : '<option value="">Primero crea una categoría →</option>';
@@ -67,25 +69,45 @@ async function loadCategories(selectId) {
   preview();
 }
 
-// ---------------- Nueva categoría ----------------
+// ---------------- Nueva / editar categoría ----------------
 const dlg = document.getElementById('cat-dialog');
 const cf = document.getElementById('cat-form');
 const catError = document.getElementById('cat-error');
 let defaultTaxId = '';
-document.getElementById('new-cat').onclick = () => {
-  cf.reset(); cf.tax_rate_id.value = defaultTaxId; catError.classList.add('hidden'); dlg.showModal(); cf.name.focus();
+let editingId = null;   // null = crear; id = editar esa categoría
+
+function openCategoryForm(cat = null) {
+  editingId = cat?.id ?? null;
+  cf.reset();
+  cf.tax_rate_id.value = cat?.tax_rate_id ? String(cat.tax_rate_id) : defaultTaxId;
+  if (cat) {
+    cf.name.value = cat.name;
+    cf.margin_pct.value = cat.margin_pct ?? '';
+    cf.min_stock.value = cat.min_stock;
+  }
+  document.getElementById('cat-title').textContent = cat ? `Editar categoría "${cat.name}"` : 'Nueva categoría';
+  document.getElementById('cat-submit').textContent = cat ? 'Guardar cambios' : 'Crear categoría';
+  document.getElementById('cat-edit-note').classList.toggle('hidden', !cat);
+  catError.classList.add('hidden');
+  dlg.showModal(); cf.name.focus();
+}
+document.getElementById('new-cat').onclick = () => openCategoryForm();
+document.getElementById('edit-cat').onclick = () => {
+  const cat = categories.find((c) => String(c.id) === f.category_id.value);
+  if (cat) openCategoryForm(cat);
 };
 document.getElementById('cat-cancel').onclick = () => dlg.close();
 cf.onsubmit = async (e) => {
   e.preventDefault();
+  const data = {
+    name: cf.name.value, margin_pct: cf.margin_pct.value.trim(), min_stock: cf.min_stock.value.trim(),
+    tax_rate_id: cf.tax_rate_id.value,
+  };
   try {
-    const cat = await api.post('/categories', {
-      name: cf.name.value, margin_pct: cf.margin_pct.value.trim(), min_stock: cf.min_stock.value.trim(),
-      tax_rate_id: cf.tax_rate_id.value,
-    });
+    const cat = editingId ? await api.put(`/categories/${editingId}`, data) : await api.post('/categories', data);
     dlg.close();
     await loadCategories(cat.id);
-    toast(`Categoría "${cat.name}" creada`);
+    toast(`Categoría "${cat.name}" ${editingId ? 'actualizada' : 'creada'}`);
   } catch (err) {
     catError.textContent = err.message; catError.classList.remove('hidden');
   }

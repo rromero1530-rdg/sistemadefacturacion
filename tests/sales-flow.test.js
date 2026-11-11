@@ -107,3 +107,20 @@ test('crear categoría: valida nombre único sin importar mayúsculas y datos', 
   assert.throws(() => catalog.createCategory({ name: 'Y', min_stock: '-1' }), /Stock/);
   assert.throws(() => catalog.createCategory({ name: 'Z', tax_rate_id: 9999 }), /Impuesto/);
 });
+
+test('editar categoría: cambia datos, valida duplicados y aplica stock mínimo al instante', () => {
+  const c = catalog.createCategory({ name: 'Calzado', margin_pct: 50, min_stock: 1 });
+  catalog.createProduct({ name: 'Tenis', category_id: c.id, cost: 50000, variants: [{ size: '38', color: 'Blanco', stock: 3 }] });
+  const lowStock = () => r.reports.lowStock().some((v) => v.product_name === 'Tenis');
+  assert.equal(lowStock(), false);
+
+  const u = catalog.updateCategory(c.id, { name: 'Calzado de mujer', margin_pct: '', min_stock: 5, tax_rate_id: isv });
+  assert.equal(u.name, 'Calzado de mujer');
+  assert.equal(u.margin_pct, null);
+  assert.equal(lowStock(), true);   // 3 unidades <= 5 ahora es stock bajo
+
+  assert.equal(catalog.updateCategory(c.id, { name: 'CALZADO DE MUJER' }).name, 'CALZADO DE MUJER'); // su propio nombre
+  assert.throws(() => catalog.updateCategory(c.id, { name: 'bolsos' }), /Ya existe/);
+  assert.throws(() => catalog.createCategory({ name: 'Accesórios' }), /Ya existe/);   // tildes no cuentan
+  assert.throws(() => catalog.updateCategory(99999, { name: 'Nada' }), /no encontrada/);
+});
