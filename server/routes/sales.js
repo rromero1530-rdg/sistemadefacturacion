@@ -8,9 +8,21 @@ const { audit } = require('../services/auth');
 
 const r = Router();
 r.post('/sales/quote', (req, res) => res.json(sales.quote(req.body.items)));
-r.post('/sales', (req, res) => res.status(201).json(sales.createSale(req.body, req.user)));
-r.get('/sales', (req, res) => res.json(repos().sales.recent(Number(req.query.limit) || 20)));
+r.post('/sales', (req, res) => {
+  const sale = sales.createSale(req.body, req.user);
+  if (sale.manual_discount) {
+    audit(repos(), 'manual_discount', { user: req.user, ip: req.ip,
+      detail: { sale: sale.doc_number, amount: sale.manual_discount, reason: sale.manual_discount_reason } });
+  }
+  res.status(201).json(sale);
+});
+r.get('/sales', (req, res) => res.json(sales.listSales(req.query)));
 r.get('/sales/:id', (req, res) => res.json(sales.getSale(Number(req.params.id))));
+r.post('/sales/:id/reprint', (req, res) => {
+  const sale = sales.reprint(Number(req.params.id));
+  audit(repos(), 'sale_reprint', { user: req.user, ip: req.ip, detail: { sale: sale.doc_number, count: sale.reprint_count } });
+  res.json(sale);
+});
 
 r.get('/cash/current', (req, res) => res.json(cash.summary(null)));
 r.post('/cash/open', (req, res) => {

@@ -28,6 +28,9 @@
       <button id="btn-cash" class="whitespace-nowrap text-sm px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5">
         <i data-lucide="wallet"></i><span id="cash-label">Caja</span>
       </button>
+      <button id="btn-history" class="whitespace-nowrap text-sm px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 flex items-center gap-1.5" title="Ventas del día y reimpresión">
+        <i data-lucide="receipt-text"></i>Ventas
+      </button>
       <button id="btn-alerts" class="relative p-2 rounded-md hover:bg-slate-100" title="Alertas">
         <i data-lucide="bell"></i>
         <span id="alert-count" class="hidden absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] grid place-items-center"></span>
@@ -49,18 +52,31 @@
           placeholder="Escanea código de barras o busca por nombre, talla, color…" />
         <span class="kbd absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">F4</span>
       </div>
-      <div id="categories" class="flex gap-2 flex-wrap"></div>
-      <div id="results" class="flex-1 overflow-y-auto grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 content-start pb-4"></div>
+      <div class="flex items-start gap-3">
+        <div id="categories" class="flex gap-2 flex-wrap flex-1"></div>
+        <div class="flex items-center gap-2 shrink-0 text-sm">
+          <label class="flex items-center gap-1.5 text-slate-600 cursor-pointer select-none" title="Ocultar productos agotados">
+            <input id="only-stock" type="checkbox" class="accent-brand-600" />Solo con existencia</label>
+          <div class="flex rounded-lg border border-slate-200 bg-white overflow-hidden" role="group" aria-label="Vista">
+            <button id="view-grid" class="px-2.5 py-1.5" title="Vista en tarjetas"><i data-lucide="layout-grid"></i></button>
+            <button id="view-list" class="px-2.5 py-1.5 border-l border-slate-200" title="Vista en lista"><i data-lucide="list"></i></button>
+          </div>
+        </div>
+      </div>
+      <div id="results" class="flex-1 overflow-y-auto pb-4"></div>
     </section>
 
     <!-- Carrito -->
     <aside class="bg-white border-l border-slate-200 flex flex-col min-h-0">
-      <div class="p-4 border-b border-slate-100 flex items-center gap-2">
-        <i data-lucide="user" class="text-slate-400"></i>
-        <select id="customer" class="flex-1 text-sm border border-slate-200 rounded-md px-2 py-1.5 bg-white">
-          <option value="">Consumidor Final</option>
-        </select>
-      </div>
+      <button id="customer-btn" class="p-4 border-b border-slate-100 flex items-center gap-2 text-left hover:bg-slate-50" title="Cliente / datos de la factura">
+        <i data-lucide="user" class="text-slate-400 shrink-0"></i>
+        <span class="flex-1 min-w-0">
+          <span class="block text-[11px] uppercase tracking-wide text-slate-400">Factura a nombre de</span>
+          <span id="customer-name" class="block text-sm font-medium truncate">Consumidor Final</span>
+          <span id="customer-doc" class="block text-xs text-slate-500 truncate"></span>
+        </span>
+        <span class="text-xs text-brand-700 shrink-0">Cambiar</span>
+      </button>
 
       <div id="cart" class="flex-1 overflow-y-auto divide-y divide-slate-100"></div>
 
@@ -68,7 +84,9 @@
         <div id="promos" class="space-y-1"></div>
         <dl class="text-sm space-y-1">
           <div class="flex justify-between text-slate-500"><dt>Subtotal</dt><dd id="t-gross">L 0.00</dd></div>
-          <div class="flex justify-between text-emerald-700"><dt>Descuentos</dt><dd id="t-discount">L 0.00</dd></div>
+          <div class="flex justify-between items-center text-emerald-700"><dt class="flex items-center gap-2">Descuentos
+              <button id="btn-discount" class="text-xs px-2 py-0.5 rounded border border-emerald-300 bg-white hover:bg-emerald-50" title="Descuento manual a toda la venta">% Aplicar</button></dt>
+            <dd id="t-discount">L 0.00</dd></div>
           <div class="flex justify-between text-slate-500"><dt>Importe gravado 15 %</dt><dd id="t-taxable15">L 0.00</dd></div>
           <div class="flex justify-between text-slate-500"><dt>ISV 15 %</dt><dd id="t-tax15">L 0.00</dd></div>
           <div class="flex justify-between text-2xl font-bold pt-1"><dt>Total</dt><dd id="t-total">L 0.00</dd></div>

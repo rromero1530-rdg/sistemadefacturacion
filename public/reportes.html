@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoe Closet · Reportes</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/js/tw-config.js"></script>
+  <script src="/vendor/lucide.min.js"></script>
+  <style>
+    [data-lucide]{width:1.1em;height:1.1em}
+    .bar{background:#b45f80;border-radius:4px 4px 0 0}
+    .bar:hover,.bar:focus-visible{background:#914865;outline:none}
+    .hbar{background:#b45f80;border-radius:0 4px 4px 0}
+    #tip{pointer-events:none}
+    @media print { #app-header, .no-print { display:none !important } body{background:#fff} }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen">
+  <header id="app-header" data-page="reportes" class="h-14 bg-white border-b border-slate-200"></header>
+
+  <main class="max-w-7xl mx-auto p-4 sm:p-5 space-y-4">
+    <!-- Filtros en una sola fila -->
+    <div class="flex flex-wrap items-center gap-2">
+      <h1 class="text-xl font-semibold mr-auto">Reportes</h1>
+      <div id="presets" class="no-print flex flex-wrap gap-1 bg-white border border-slate-200 rounded-xl p-1 text-sm"></div>
+      <div class="no-print flex items-center gap-1 text-sm">
+        <input id="from" type="date" class="border border-slate-200 rounded-lg px-2 py-1.5 bg-white" aria-label="Desde" />
+        <span class="text-slate-400">a</span>
+        <input id="to" type="date" class="border border-slate-200 rounded-lg px-2 py-1.5 bg-white" aria-label="Hasta" />
+      </div>
+      <button id="btn-print" class="no-print px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-sm flex items-center gap-1.5">
+        <i data-lucide="printer"></i>Imprimir</button>
+    </div>
+    <p id="range-label" class="text-sm text-slate-500 -mt-2"></p>
+
+    <div id="kpis" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3"></div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <section class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 id="period-title" class="font-semibold">Ventas por día</h2>
+          <button data-csv="period" class="no-print text-xs text-brand-700 hover:underline flex items-center gap-1"><i data-lucide="download"></i>Excel</button>
+        </div>
+        <div id="chart-period" class="relative"></div>
+      </section>
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <h2 class="font-semibold mb-3">Formas de pago</h2>
+        <div id="pay"></div>
+      </section>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4">
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Productos más vendidos</h2>
+          <button data-csv="top" class="no-print text-xs text-brand-700 hover:underline flex items-center gap-1"><i data-lucide="download"></i>Excel</button></div>
+        <div id="top"></div>
+      </section>
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Rentabilidad por categoría</h2>
+          <button data-csv="cat" class="no-print text-xs text-brand-700 hover:underline flex items-center gap-1"><i data-lucide="download"></i>Excel</button></div>
+        <div id="cat"></div>
+      </section>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <h2 class="font-semibold mb-3">Estado de resultados</h2>
+        <div id="income"></div>
+      </section>
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <h2 class="font-semibold mb-3">Ventas por hora del día</h2>
+        <div id="chart-hour" class="relative"></div>
+      </section>
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <h2 class="font-semibold mb-3">Ventas por vendedor</h2>
+        <div id="users"></div>
+      </section>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4">
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Descuentos manuales</h2>
+          <button data-csv="disc" class="no-print text-xs text-brand-700 hover:underline flex items-center gap-1"><i data-lucide="download"></i>Excel</button></div>
+        <div id="disc"></div>
+      </section>
+      <section class="bg-white rounded-xl border border-slate-200 p-4">
+        <h2 class="font-semibold mb-3">Lo que pidieron y no teníamos (faltantes)</h2>
+        <div id="demand"></div>
+      </section>
+    </div>
+  </main>
+
+  <div id="tip" class="hidden fixed z-50 px-2.5 py-1.5 rounded-md bg-slate-900 text-white text-xs shadow-lg"></div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/reportes.js"></script>
+</body>
+</html>

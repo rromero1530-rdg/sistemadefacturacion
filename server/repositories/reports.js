@@ -47,6 +47,40 @@ module.exports = (db) => ({
                               COALESCE(SUM(cost_total),0) AS cost, COALESCE(SUM(discount_amount),0) AS discounts
                        FROM sales WHERE status = 'completed' AND created_at BETWEEN @from AND @to`).get({ from, to });
   },
+  /** Resumen del período, incluido el descuento manual y las unidades vendidas. */
+  periodTotals(from, to) {
+    return db.prepare(`SELECT COUNT(*) AS tickets, COALESCE(SUM(total),0) AS total,
+                              COALESCE(SUM(tax15_amount + tax18_amount),0) AS taxes, COALESCE(SUM(cost_total),0) AS cost,
+                              COALESCE(SUM(discount_amount),0) AS discounts, COALESCE(SUM(manual_discount),0) AS manual_discounts,
+                              COALESCE((SELECT SUM(i.qty) FROM sale_items i JOIN sales x ON x.id = i.sale_id
+                                        WHERE x.status = 'completed' AND x.created_at BETWEEN @from AND @to), 0) AS units
+                       FROM sales WHERE status = 'completed' AND created_at BETWEEN @from AND @to`).get({ from, to });
+  },
+  paymentMethods(from, to) {
+    return db.prepare(`SELECT p.method, COUNT(DISTINCT p.sale_id) AS tickets, SUM(p.amount) AS amount
+                       FROM sale_payments p JOIN sales s ON s.id = p.sale_id
+                       WHERE s.status = 'completed' AND s.created_at BETWEEN @from AND @to
+                       GROUP BY p.method ORDER BY amount DESC`).all({ from, to });
+  },
+  byUser(from, to) {
+    return db.prepare(`SELECT COALESCE(u.name, 'Sin usuario') AS user_name, COUNT(*) AS tickets, SUM(s.total) AS total,
+                              SUM(s.manual_discount) AS manual_discounts
+                       FROM sales s LEFT JOIN users u ON u.id = s.user_id
+                       WHERE s.status = 'completed' AND s.created_at BETWEEN @from AND @to
+                       GROUP BY s.user_id ORDER BY total DESC`).all({ from, to });
+  },
+  manualDiscounts(from, to) {
+    return db.prepare(`SELECT s.id, s.doc_number, s.created_at, s.customer_name, s.total, s.manual_discount AS amount,
+                              s.manual_discount_reason AS reason, COALESCE(u.name, '—') AS user_name
+                       FROM sales s LEFT JOIN users u ON u.id = s.user_id
+                       WHERE s.status = 'completed' AND s.manual_discount > 0 AND s.created_at BETWEEN @from AND @to
+                       ORDER BY s.id DESC LIMIT 300`).all({ from, to });
+  },
+  byHour(from, to) {
+    return db.prepare(`SELECT CAST(substr(created_at, 12, 2) AS INTEGER) AS hour, COUNT(*) AS tickets, SUM(total) AS total
+                       FROM sales WHERE status = 'completed' AND created_at BETWEEN @from AND @to
+                       GROUP BY 1 ORDER BY 1`).all({ from, to });
+  },
   expensesByCategory(from, to) {
     return db.prepare(`SELECT category, SUM(amount) AS amount FROM expenses
                        WHERE expense_date BETWEEN @from AND @to GROUP BY category ORDER BY amount DESC`)

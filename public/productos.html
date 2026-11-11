@@ -20,7 +20,8 @@
       <div class="grid grid-cols-2 gap-3">
         <div class="col-span-2"><label class="block text-slate-600 mb-1">Nombre *</label>
           <input name="name" required class="w-full border rounded-md px-3 py-2" placeholder="Blusa de seda manga larga" /></div>
-        <div><label class="block text-slate-600 mb-1">Código / estilo</label><input name="code" class="w-full border rounded-md px-3 py-2" placeholder="BLU-SEDA" /></div>
+        <div><label class="block text-slate-600 mb-1">Código / estilo</label><input name="code" class="w-full border rounded-md px-3 py-2" placeholder="Automático" />
+          <p id="code-hint" class="text-xs text-slate-400 mt-1">Vacío = se asigna solo según la categoría.</p></div>
         <div><label class="block text-slate-600 mb-1">Marca</label><input name="brand" class="w-full border rounded-md px-3 py-2" /></div>
         <div><label class="flex items-center justify-between text-slate-600 mb-1">Categoría *
             <span class="flex gap-3"><button type="button" id="edit-cat" class="text-brand-700 hover:underline flex items-center gap-0.5"><i data-lucide="pencil"></i>Editar</button>
@@ -32,8 +33,11 @@
       <div class="rounded-xl bg-brand-50 p-4 grid grid-cols-3 gap-3">
         <div><label class="block text-slate-700 mb-1 font-medium">Costo bruto (L) *</label>
           <input name="cost" required inputmode="decimal" class="w-full border rounded-md px-3 py-2 text-lg" placeholder="0.00" /></div>
-        <div><label class="block text-slate-700 mb-1">Flete/aduana %</label>
-          <input name="extra_cost_pct" inputmode="decimal" class="w-full border rounded-md px-3 py-2" placeholder="0" /></div>
+        <div><label class="block text-slate-700 mb-1">Flete/aduana por unidad</label>
+          <div class="flex">
+            <input name="extra" inputmode="decimal" class="w-full min-w-0 border rounded-l-md px-3 py-2" placeholder="0.00" />
+            <select name="extra_unit" class="border border-l-0 rounded-r-md px-1.5 bg-white" title="Lempiras o porcentaje del costo">
+              <option value="L">L</option><option value="pct">%</option></select></div></div>
         <div><label class="block text-slate-700 mb-1">Margen % <span class="text-slate-400">(vacío = categoría)</span></label>
           <input name="margin_pct" inputmode="decimal" class="w-full border rounded-md px-3 py-2" /></div>
       </div>
@@ -72,9 +76,14 @@
         <div><label class="block text-slate-600 mb-1">Stock mínimo</label>
           <input name="min_stock" inputmode="numeric" class="w-full border rounded-md px-3 py-2" value="2" /></div>
       </div>
-      <div><label class="block text-slate-600 mb-1">Impuesto</label>
-        <select name="tax_rate_id" class="w-full border rounded-md px-2 py-2"></select></div>
-      <p class="text-xs text-slate-500">Margen vacío = se usa el margen general. El stock mínimo activa la alerta de "stock bajo".</p>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block text-slate-600 mb-1">Impuesto</label>
+          <select name="tax_rate_id" class="w-full border rounded-md px-2 py-2"></select></div>
+        <div><label class="block text-slate-600 mb-1">Prefijo de código</label>
+          <input name="code_prefix" maxlength="6" class="w-full border rounded-md px-3 py-2 uppercase" placeholder="Auto" /></div>
+      </div>
+      <p class="text-xs text-slate-500">Margen vacío = se usa el margen general. El stock mínimo activa la alerta de "stock bajo".
+        El prefijo arma el código de cada estilo (ej. JEAN → JEAN-0001, JEAN-0002…); vacío = se toma del nombre.</p>
       <p id="cat-edit-note" class="hidden text-xs text-amber-800 bg-amber-50 rounded-md px-3 py-2">Cambiar el margen no cambia los precios de los productos que ya existen; solo se usa para los productos nuevos. El stock mínimo y el impuesto sí se aplican de inmediato.</p>
       <p id="cat-error" class="hidden text-red-700 bg-red-50 rounded-md px-3 py-2"></p>
       <div class="flex justify-end gap-2 pt-1">

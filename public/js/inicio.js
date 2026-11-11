@@ -1,16 +1,17 @@
 // Zoe Closet - Pantalla de inicio: estado del día y acceso a los módulos según el rol.
 const MODULES = [
   { href: '/vender.html', icon: 'scan-barcode', title: 'Vender', desc: 'Punto de venta, cobro, caja y faltantes.', roles: ['admin', 'cajero'] },
-  { href: '/productos.html', icon: 'package', title: 'Inventario', desc: 'Alta de productos, tallas, colores y cálculo de precio.', roles: ['admin'] },
+  { href: '/inventario.html', icon: 'package', title: 'Inventario', desc: 'Existencias en tabla, entradas de mercancía, ajustes y alta de productos.', roles: ['admin'] },
+  { href: '/clientes.html', icon: 'contact', title: 'Clientes y proveedores', desc: 'Datos, RTN/DNI, crédito, abonos, historial y compras a proveedores.', roles: ['admin'] },
+  { href: '/clientes.html', icon: 'contact', title: 'Clientes', desc: 'Datos, RTN/DNI, crédito, abonos e historial de compras.', roles: ['cajero'] },
+  { href: '/reportes.html', icon: 'bar-chart-3', title: 'Reportes', desc: 'Ventas, utilidad, más vendidos, formas de pago, vendedores y faltantes.', roles: ['admin'] },
   { href: '/usuarios.html', icon: 'users', title: 'Usuarios', desc: 'Cuentas de cajeros y administradores, bitácora de seguridad.', roles: ['admin'] },
   { href: '/cambiar-clave.html', icon: 'key-round', title: 'Mi contraseña', desc: 'Cambiar la contraseña de tu cuenta.', roles: ['admin', 'cajero'] },
 ];
-// Módulos cuya API ya existe pero aún no tienen pantalla.
+// Módulos que aún no tienen pantalla.
 const SOON = [
-  { icon: 'bar-chart-3', title: 'Reportes' },
-  { icon: 'contact', title: 'Clientes y crédito' },
-  { icon: 'truck', title: 'Proveedores' },
   { icon: 'settings', title: 'Configuración' },
+  { icon: 'undo-2', title: 'Devoluciones y cambios' },
 ];
 
 const pill = (icon, text, tone) => `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${tone}">

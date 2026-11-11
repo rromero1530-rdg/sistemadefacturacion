@@ -14,13 +14,25 @@ function addVariant(v = {}) {
 }
 
 function payload() {
+  const inLempiras = f.extra_unit.value === 'L';
   return {
     name: f.name.value, code: f.code.value || null, brand: f.brand.value || null,
     category_id: Number(f.category_id.value), tax_rate_id: Number(f.tax_rate_id.value) || null,
-    cost: toCents(f.cost.value || 0), extra_cost_pct: Number(f.extra_cost_pct.value || 0),
+    cost: toCents(f.cost.value || 0),
+    extra_cost: inLempiras ? toCents(f.extra.value || 0) : 0,
+    extra_cost_pct: inLempiras ? 0 : Number(f.extra.value || 0),
     margin_pct: pct(f.margin_pct.value),
   };
 }
+
+// El código queda vacío para que se asigne solo; se muestra cómo quedará.
+function updateCodeHint() {
+  const cat = categories.find((c) => String(c.id) === f.category_id.value);
+  document.getElementById('code-hint').textContent = cat
+    ? `Vacío = se asigna solo: ${cat.code_prefix}-${String((cat.code_seq || 0) + 1).padStart(4, '0')}`
+    : 'Vacío = se asigna solo según la categoría.';
+}
+f.category_id.addEventListener('change', updateCodeHint);
 
 let t;
 async function preview() {
@@ -30,8 +42,10 @@ async function preview() {
     try {
       const p = await api.post('/pricing/preview', payload());
       const row = (a, b) => `<div class="flex justify-between"><dt>${a}</dt><dd class="text-slate-900">${b}</dd></div>`;
+      const freight = p.landedCost - p.cost;
       document.getElementById('preview').innerHTML =
-        row('Costo bruto', L(p.cost)) + row('Costo puesto en tienda', L(p.landedCost)) +
+        row('Costo bruto', L(p.cost)) + (freight ? row('+ Flete/aduana', L(freight)) : '') +
+        row('Costo puesto en tienda', L(p.landedCost)) +
         row(`Margen aplicado (${p.mode === 'margin' ? 'sobre precio' : 'sobre costo'})`, p.marginPct + ' %') +
         row('Precio sin ISV', L(p.netPrice)) + row(p.taxRate.name, L(p.tax)) +
         row('Utilidad por unidad', `<b class="text-emerald-700">${L(p.profit)}</b>`) +
@@ -53,8 +67,10 @@ f.onsubmit = async (e) => {
   const ov = document.getElementById('price-override').value;
   try {
     const res = await api.post('/products', { ...payload(), variants, price: ov ? toCents(ov) : undefined });
-    toast(`Guardado: ${res.variants.length} variante(s) a ${L(res.product.price)}`);
-    f.reset(); vbox.innerHTML = ''; addVariant(); preview();
+    toast(`Guardado ${res.product.code}: ${res.variants.length} variante(s) a ${L(res.product.price)}`);
+    const keepCategory = f.category_id.value;
+    f.reset(); vbox.innerHTML = ''; addVariant();
+    await loadCategories(keepCategory);   // refresca el consecutivo del código
   } catch (err) { toast(err.message, 'error'); }
 };
 
@@ -66,6 +82,7 @@ async function loadCategories(selectId) {
     ? cats.map((c) => `<option value="${c.id}">${esc(c.name)} (margen ${c.margin_pct ?? 'global'} %)</option>`).join('')
     : '<option value="">Primero crea una categoría →</option>';
   if (selectId) f.category_id.value = String(selectId);
+  updateCodeHint();
   preview();
 }
 
@@ -84,6 +101,7 @@ function openCategoryForm(cat = null) {
     cf.name.value = cat.name;
     cf.margin_pct.value = cat.margin_pct ?? '';
     cf.min_stock.value = cat.min_stock;
+    cf.code_prefix.value = cat.code_prefix || '';
   }
   document.getElementById('cat-title').textContent = cat ? `Editar categoría "${cat.name}"` : 'Nueva categoría';
   document.getElementById('cat-submit').textContent = cat ? 'Guardar cambios' : 'Crear categoría';
@@ -101,7 +119,7 @@ cf.onsubmit = async (e) => {
   e.preventDefault();
   const data = {
     name: cf.name.value, margin_pct: cf.margin_pct.value.trim(), min_stock: cf.min_stock.value.trim(),
-    tax_rate_id: cf.tax_rate_id.value,
+    tax_rate_id: cf.tax_rate_id.value, code_prefix: cf.code_prefix.value.trim(),
   };
   try {
     const cat = editingId ? await api.put(`/categories/${editingId}`, data) : await api.post('/categories', data);

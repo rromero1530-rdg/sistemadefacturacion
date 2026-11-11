@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoe Closet · Clientes y proveedores</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/js/tw-config.js"></script>
+  <script src="/vendor/lucide.min.js"></script>
+  <style>[data-lucide]{width:1.1em;height:1.1em}</style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen">
+  <header id="app-header" data-page="clientes" class="h-14 bg-white border-b border-slate-200"></header>
+
+  <main class="max-w-6xl mx-auto p-4 sm:p-5 space-y-4">
+    <div class="flex flex-wrap items-center gap-3">
+      <div id="tabs" class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 text-sm mr-auto"></div>
+      <button id="btn-csv" class="px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-sm flex items-center gap-1.5">
+        <i data-lucide="download"></i>Exportar a Excel</button>
+      <button id="btn-new" class="px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium flex items-center gap-1.5">
+        <i data-lucide="plus"></i><span id="btn-new-label">Nuevo cliente</span></button>
+    </div>
+
+    <div class="relative">
+      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <input id="q" autocomplete="off" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm" placeholder="Buscar por nombre, RTN, DNI o teléfono…" />
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 overflow-auto">
+      <table class="w-full text-sm">
+        <thead id="head" class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wide"></thead>
+        <tbody id="rows" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+    <p class="text-xs text-slate-500">Haz clic en una fila para ver el detalle, el historial y editar. Los clientes también se crean solos al facturar con RTN o DNI.</p>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/clientes.js"></script>
+</body>
+</html>

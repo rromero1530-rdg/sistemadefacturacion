@@ -140,16 +140,20 @@ Para migrar a PostgreSQL solo se reescriben `repositories/` y `db/connection.js`
 
 | # | Módulo | Estado |
 |---|---|---|
-| 1 | Inventario por producto / talla / color / categoría, ingreso de mercancía con costo promedio | ✅ API + alta de productos |
-| 2 | POS con lector de código de barras, búsqueda, atajos (F2, F4, F9) | ✅ |
+| 1 | Inventario en tabla (filtros, totales al costo y a precio, Excel), entradas con proveedor y flete, ajustes por conteo | ✅ |
+| 1b | Código de estilo automático por categoría (`JEAN-0001`); flete/aduana en lempiras o % | ✅ |
+| 2 | POS con lector de código de barras, vista en tarjetas o lista, "solo con existencia", atajos (F2, F4, F9) | ✅ |
+| 2c | Descuento manual por artículo o a toda la venta, con motivo; el cajero tiene tope (`max_cashier_discount_pct`) | ✅ |
+| 2d | Factura a nombre de: RTN (14) o DNI (13) + nombre; si es nuevo se registra como cliente al cobrar | ✅ |
+| 2e | Aviso emergente al agotarse un producto; ventas del día y **reimpresión** marcada "REIMPRESIÓN" | ✅ |
 | 2b | Botón **Faltante / Demanda insatisfecha** (F2), con teléfono para avisar al cliente | ✅ |
 | 3 | Costo bruto → gastos de importación → margen (producto > categoría > global) → ISV → redondeo | ✅ |
 | 4 | Apertura, gastos/retiros, arqueo y cierre con sobrante/faltante | ✅ |
-| 5 | Clientes (RTN, límite y días de crédito, historial, abonos FIFO) y proveedores | ✅ API |
-| 6 | Reportes: ventas día/semana/mes, más vendidos, rentabilidad por categoría | ✅ API |
+| 5 | Clientes (RTN/DNI, crédito, historial, abonos FIFO) y proveedores (datos y entradas de mercancía) | ✅ |
+| 6 | Reportes: indicadores, ventas por día/semana/mes y por hora, formas de pago, vendedores, más vendidos, rentabilidad por categoría, descuentos, faltantes | ✅ |
 | 7 | Fiscal SAR: C.A.I., rangos, numeración `000-001-01-00000001`, fecha límite, alertas | ✅ estructura |
-| 8 | Contabilidad básica: ingresos sin ISV, costo de ventas, gastos, utilidad neta | ✅ API |
-| 9 | Alertas: crédito vencido, stock mínimo, lento movimiento | ✅ |
+| 8 | Contabilidad básica: ingresos sin ISV, costo de ventas, gastos, utilidad neta | ✅ (en Reportes) |
+| 9 | Alertas: crédito vencido, stock mínimo, sin vender por niveles (`slow_moving_tiers`, por defecto 15, 30 y 60 días) | ✅ |
 | 10 | Promociones: combos (bolso + accesorio −15 %) y descuentos por categoría/producto | ✅ motor (alta por API/SQL) |
 
 ### Cálculo de precio
@@ -197,7 +201,7 @@ requieren la cabecera `X-Requested-With: ZoeCloset`.
 
 ## Próximos pasos sugeridos
 
-1. Pantallas de reportes, clientes, proveedores, promociones y configuración (la API ya existe).
+1. Pantallas de promociones y configuración (datos del negocio, C.A.I., topes de descuento, niveles de alerta).
 2. Bitácora de anulaciones de ventas con autorización de administrador.
 3. Anulación de ventas y devoluciones/cambios de talla (muy comunes en ropa).
 4. Impresión de etiquetas con código de barras y ticket térmico de 80 mm.

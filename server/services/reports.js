@@ -20,9 +20,27 @@ function incomeStatement(q, r = repos()) {
            netRevenue, costOfSales: s.cost, grossProfit, expenses, totalExpenses, netProfit: grossProfit - totalExpenses };
 }
 
+/** Indicadores principales del período. */
+function summary(q, r = repos()) {
+  const { from, to } = range(q);
+  const t = r.reports.periodTotals(from, to);
+  const netRevenue = t.total - t.taxes;
+  return {
+    from, to, tickets: t.tickets, units: t.units, total: t.total, taxes: t.taxes, discounts: t.discounts,
+    manualDiscounts: t.manual_discounts, cost: t.cost, netRevenue, grossProfit: netRevenue - t.cost,
+    marginPct: netRevenue ? Math.round(((netRevenue - t.cost) / netRevenue) * 1000) / 10 : 0,
+    avgTicket: t.tickets ? Math.round(t.total / t.tickets) : 0,
+  };
+}
+const paymentMethods = (q) => { const { from, to } = range(q); return repos().reports.paymentMethods(from, to); };
+const byUser = (q) => { const { from, to } = range(q); return repos().reports.byUser(from, to); };
+const discounts = (q) => { const { from, to } = range(q); return repos().reports.manualDiscounts(from, to); };
+const byHour = (q) => { const { from, to } = range(q); return repos().reports.byHour(from, to); };
+
 const sales = (q) => { const { from, to } = range(q); return repos().reports.salesByPeriod(from, to, q.group); };
 const topProducts = (q) => { const { from, to } = range(q); return repos().reports.topProducts(from, to, Number(q.limit || 20)); };
 const profitByCategory = (q) => { const { from, to } = range(q); return repos().reports.profitByCategory(from, to); };
 const unmetDemand = (q) => repos().demand.summary(range(q).from);
 
-module.exports = { incomeStatement, sales, topProducts, profitByCategory, unmetDemand, range };
+module.exports = { incomeStatement, summary, paymentMethods, byUser, discounts, byHour, sales, topProducts,
+                   profitByCategory, unmetDemand, range };

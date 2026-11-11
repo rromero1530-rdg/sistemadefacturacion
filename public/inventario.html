@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoe Closet · Inventario</title>
+  <link rel="icon" href="/favicon.ico" />
+  <script src="/vendor/tailwind.js"></script>
+  <script src="/js/tw-config.js"></script>
+  <script src="/vendor/lucide.min.js"></script>
+  <style>
+    [data-lucide]{width:1.1em;height:1.1em}
+    th[data-sort]{cursor:pointer;user-select:none}
+    th[data-sort]:hover{color:#914865}
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen">
+  <header id="app-header" data-page="inventario" class="h-14 bg-white border-b border-slate-200"></header>
+
+  <main class="max-w-[1400px] mx-auto p-4 sm:p-5 space-y-4">
+    <div class="flex flex-wrap items-center gap-3">
+      <h1 class="text-xl font-semibold mr-auto">Inventario</h1>
+      <button id="btn-csv" class="px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-sm flex items-center gap-1.5">
+        <i data-lucide="download"></i>Exportar a Excel</button>
+      <a href="/productos.html" class="px-3 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium flex items-center gap-1.5">
+        <i data-lucide="plus"></i>Nuevo producto</a>
+    </div>
+
+    <!-- Totales -->
+    <div id="kpis" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-xl border border-slate-200 p-3 flex flex-wrap gap-2 items-center">
+      <div class="relative flex-1 min-w-[220px]">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input id="q" autocomplete="off" class="w-full pl-9 pr-3 py-2 rounded-lg border border-slate-200 text-sm" placeholder="Buscar por nombre, código, talla, color, código de barras…" />
+      </div>
+      <select id="cat" class="border border-slate-200 rounded-lg px-2 py-2 text-sm"><option value="">Todas las categorías</option></select>
+      <div id="status" class="flex flex-wrap gap-1.5 text-sm"></div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="bg-white rounded-xl border border-slate-200 overflow-auto max-h-[calc(100vh-300px)]">
+      <table class="w-full text-sm">
+        <thead class="sticky top-0 bg-slate-50 text-slate-600 text-xs uppercase tracking-wide z-10">
+          <tr class="text-left">
+            <th class="px-3 py-2.5" data-sort="product_code">Código</th>
+            <th class="px-3 py-2.5" data-sort="product_name">Producto</th>
+            <th class="px-3 py-2.5" data-sort="category_name">Categoría</th>
+            <th class="px-3 py-2.5" data-sort="size">Talla</th>
+            <th class="px-3 py-2.5" data-sort="color">Color</th>
+            <th class="px-3 py-2.5 text-right" data-sort="stock">Existencia</th>
+            <th class="px-3 py-2.5 text-right" data-sort="min_stock">Mínimo</th>
+            <th class="px-3 py-2.5 text-right" data-sort="cost">Costo</th>
+            <th class="px-3 py-2.5 text-right" data-sort="price">Precio</th>
+            <th class="px-3 py-2.5 text-right" data-sort="idle_days">Días sin vender</th>
+            <th class="px-3 py-2.5 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="rows" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+    <p class="text-xs text-slate-500">Haz clic en el título de una columna para ordenar. "Días sin vender" cuenta desde la última venta (o desde que entró, si nunca se ha vendido).</p>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/inventario.js"></script>
+</body>
+</html>

@@ -101,13 +101,14 @@ function rateLimit({ windowMs, max }) {
 
 /** Páginas HTML protegidas: sin sesión redirige al login. */
 const PUBLIC_PAGES = new Set(['/login.html']);
+const ADMIN_PAGES = new Set(['/usuarios.html', '/productos.html', '/inventario.html', '/reportes.html']);
 function protectPages(req, res, next) {
   if (req.method !== 'GET') return next();
   const p = req.path === '/' ? '/index.html' : req.path;
   if (!p.endsWith('.html') || PUBLIC_PAGES.has(p)) return next();
   if (!req.user) return res.redirect('/login.html');
   if (req.user.must_change_password && p !== '/cambiar-clave.html') return res.redirect('/cambiar-clave.html');
-  if (p === '/usuarios.html' && req.user.role !== 'admin') return res.redirect('/');
+  if (ADMIN_PAGES.has(p) && req.user.role !== 'admin') return res.redirect('/');
   next();
 }
 

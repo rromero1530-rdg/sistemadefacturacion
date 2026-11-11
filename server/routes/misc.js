@@ -17,7 +17,7 @@ const r = Router();
 // ---- Configuración ----
 const EDITABLE = ['business_name', 'business_rtn', 'business_address', 'business_phone', 'business_email',
   'fiscal_mode', 'pricing_mode', 'default_margin_pct', 'price_rounding', 'slow_moving_days', 'allow_negative_stock',
-  'session_idle_minutes'];
+  'session_idle_minutes', 'slow_moving_tiers', 'max_cashier_discount_pct'];
 r.get('/settings', (req, res) => res.json(repos().settings.all()));
 r.put('/settings', admin, (req, res) => {
   const s = repos().settings;
@@ -25,6 +25,8 @@ r.put('/settings', admin, (req, res) => {
     if (!EDITABLE.includes(k)) throw badRequest(`Parámetro no editable: ${k}`);
     if (k === 'fiscal_mode' && !['informal', 'formal'].includes(v)) throw badRequest('fiscal_mode inválido');
     if (k === 'pricing_mode' && !['markup', 'margin'].includes(v)) throw badRequest('pricing_mode inválido');
+    if (k === 'slow_moving_tiers' && !/^\d{1,3}(,\d{1,3}){0,4}$/.test(String(v))) throw badRequest('Niveles inválidos (ej. 15,30,60)');
+    if (k === 'max_cashier_discount_pct' && !(Number(v) >= 0 && Number(v) <= 100)) throw badRequest('Porcentaje inválido');
     s.set(k, v);
   }
   audit(repos(), 'settings_updated', { user: req.user, ip: req.ip, detail: req.body });
@@ -58,6 +60,23 @@ r.patch('/unmet-demand/:id', admin, (req, res) => res.json({ changed: repos().de
 
 // ---- Alertas y reportes ----
 r.get('/alerts', (req, res) => res.json(getAlerts()));
+/** Todo el tablero de reportes en una sola llamada. */
+r.get('/reports/dashboard', admin, (req, res) => {
+  const q = req.query;
+  const days = (new Date(reports.range(q).to.slice(0, 10)) - new Date(reports.range(q).from.slice(0, 10))) / 86400000;
+  res.json({
+    summary: reports.summary(q),
+    byPeriod: reports.sales({ ...q, group: q.group || (days > 92 ? 'month' : days > 31 ? 'week' : 'day') }),
+    paymentMethods: reports.paymentMethods(q),
+    byUser: reports.byUser(q),
+    byHour: reports.byHour(q),
+    topProducts: reports.topProducts({ ...q, limit: 15 }),
+    profitByCategory: reports.profitByCategory(q),
+    income: reports.incomeStatement(q),
+    discounts: reports.discounts(q),
+    unmetDemand: reports.unmetDemand(q),
+  });
+});
 r.get('/reports/sales', admin, (req, res) => res.json(reports.sales(req.query)));
 r.get('/reports/top-products', admin, (req, res) => res.json(reports.topProducts(req.query)));
 r.get('/reports/profit-by-category', admin, (req, res) => res.json(reports.profitByCategory(req.query)));

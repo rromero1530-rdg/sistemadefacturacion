@@ -10,8 +10,10 @@ window.renderLayout = async function renderLayout() {
   markTestMode(status);
   const isAdmin = status.user.role === 'admin';
 
-  const link = (href, icon, label, key) => `<a href="${href}" class="px-3 py-1.5 rounded-md flex items-center gap-1.5 ${page === key
-    ? 'bg-brand-50 text-brand-700 font-medium' : 'hover:bg-slate-100'}"><i data-lucide="${icon}"></i>${label}</a>`;
+  // En Vender el encabezado tiene además caja, faltantes y ventas: el menú queda solo con íconos salvo en pantallas anchas.
+  const compact = page === 'pos';
+  const link = (href, icon, label, ...keys) => `<a href="${href}" title="${label}" class="${compact ? 'px-2 2xl:px-3' : 'px-3'} py-1.5 rounded-md flex items-center gap-1.5 whitespace-nowrap ${keys.includes(page)
+    ? 'bg-brand-50 text-brand-700 font-medium' : 'hover:bg-slate-100'}"><i data-lucide="${icon}"></i><span class="${compact ? 'hidden 2xl:inline' : ''}">${label}</span></a>`;
 
   const actions = header.innerHTML;
   header.className = 'bg-white border-b border-slate-200 px-5 h-14 flex items-center gap-3 shrink-0';
@@ -22,10 +24,12 @@ window.renderLayout = async function renderLayout() {
         <span class="block text-[19px] tracking-wide text-slate-900" style="font-family: Georgia, 'Times New Roman', serif">ZOE</span>
         <span class="block text-[15px] -mt-0.5 ml-3 text-slate-700" style="font-family: 'Segoe Script', 'Brush Script MT', cursive">Closet</span>
       </span></a>
-    <nav class="flex gap-1 text-sm">
+    <nav class="flex gap-1 text-sm overflow-x-auto">
       ${link('/', 'layout-grid', 'Inicio', 'inicio')}
       ${link('/vender.html', 'scan-barcode', 'Vender', 'pos')}
-      ${isAdmin ? link('/productos.html', 'package', 'Inventario', 'productos') : ''}
+      ${isAdmin ? link('/inventario.html', 'package', 'Inventario', 'inventario', 'productos') : ''}
+      ${link('/clientes.html', 'contact', 'Clientes', 'clientes')}
+      ${isAdmin ? link('/reportes.html', 'bar-chart-3', 'Reportes', 'reportes') : ''}
       ${isAdmin ? link('/usuarios.html', 'users', 'Usuarios', 'usuarios') : ''}
     </nav>
     <div class="ml-auto flex items-center gap-2">

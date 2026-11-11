@@ -38,6 +38,48 @@ window.toast = (msg, type = 'ok') => {
 };
 window.icons = () => window.lucide?.createIcons();
 
+// Ventana emergente reutilizable (<dialog> nativo). modal.open(título, html) devuelve el cuerpo.
+window.modal = {
+  el: null,
+  open(title, html, { wide = false } = {}) {
+    if (!this.el) {
+      this.el = document.createElement('dialog');
+      this.el.className = 'rounded-2xl p-0 backdrop:bg-slate-900/40 shadow-xl';
+      this.el.innerHTML = `<div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h2 class="m-title font-semibold"></h2>
+          <button type="button" class="m-close p-1 rounded hover:bg-slate-100" aria-label="Cerrar"><i data-lucide="x"></i></button></div>
+        <div class="m-body p-5 max-h-[75vh] overflow-y-auto"></div>`;
+      document.body.appendChild(this.el);
+      this.el.querySelector('.m-close').onclick = () => this.close();
+      this.el.addEventListener('click', (e) => { if (e.target === this.el) this.close(); });
+    }
+    this.el.style.width = wide ? 'min(96vw, 860px)' : 'min(94vw, 480px)';
+    this.el.querySelector('.m-title').textContent = title;
+    const body = this.el.querySelector('.m-body');
+    body.innerHTML = html;
+    if (!this.el.open) this.el.showModal();
+    icons();
+    return body;
+  },
+  close() { if (this.el?.open) this.el.close(); },
+};
+
+/** Descarga filas como CSV (abre bien en Excel: separador ; y BOM UTF-8). */
+window.downloadCsv = (filename, headers, rows) => {
+  const cell = (v) => {
+    const s = String(v ?? '');
+    return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const csv = '﻿' + [headers, ...rows].map((r) => r.map(cell).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+/** Monto para CSV: 1250.50 (sin "L" ni separador de miles, para que Excel lo tome como número). */
+window.csvMoney = (cents) => ((cents || 0) / 100).toFixed(2);
+
 // Franja fija para que nunca se confunda el ambiente de prueba con el sistema real.
 window.markTestMode = (status) => {
   if (!status?.testMode || document.getElementById('test-banner')) return;
